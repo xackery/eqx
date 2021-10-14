@@ -25,12 +25,12 @@ bool EQEmu::S3DLoader::ParseWLDFile(std::string file_name, std::string wld_name,
 
 	EQEmu::PFS::Archive archive;
 	if (!archive.Open(file_name)) {
-		eqLogMessage(LogDebug, "Unable to open file %s.", file_name.c_str());
+		printf("[ERR] %s: file not found\n", file_name.c_str());
 		return false;
 	}
 
 	if (!archive.Get(wld_name, buffer)) {
-		eqLogMessage(LogDebug, "Unable to open wld file %s.", wld_name.c_str());
+		printf("[ERR] %s: %s wld file not found\n", file_name.c_str(), wld_name.c_str());
 		return false;
 	}
 
@@ -38,7 +38,7 @@ bool EQEmu::S3DLoader::ParseWLDFile(std::string file_name, std::string wld_name,
 	SafeStructAllocParse(wld_header, header);
 	
 	if (header->magic != 0x54503d02) {
-		eqLogMessage(LogDebug, "Header magic of %x did not match expected 0x54503d02", header->magic);
+		printf("[ERR] %s: header magic of %x did not match expected 0x54503d02\n", file_name.c_str(), header->magic);
 		return false;
 	}
 
@@ -52,11 +52,11 @@ bool EQEmu::S3DLoader::ParseWLDFile(std::string file_name, std::string wld_name,
 	out.clear();
 	out.reserve(header->fragments);
 
-	eqLogMessage(LogTrace, "Parsing WLD fragments.");
+	printf("[INF] %s: parsing %s fragments (%d total)\n", file_name.c_str(), wld_name.c_str(), header->fragments);
 	for (uint32_t i = 0; i < header->fragments; ++i) {
 		SafeStructAllocParse(wld_fragment_header, frag_header);
 
-		eqLogMessage(LogTrace, "Dispatching WLD fragment of type %x", frag_header->id);
+		//printf("dispatching WLD fragment of type %x\n", frag_header->id);
 		switch (frag_header->id) {
 			case 0x03: {
 				S3D::WLDFragment03 f(out, &buffer[idx], frag_header->size, frag_header->name_ref, current_hash, old);
