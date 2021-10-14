@@ -391,6 +391,78 @@ pfs_crc.cpp.s:
 	cd /Users/xackery/Documents/code/projects/eqx && $(MAKE) $(MAKESILENT) -f src/common/CMakeFiles/common.dir/build.make src/common/CMakeFiles/common.dir/pfs_crc.cpp.s
 .PHONY : pfs_crc.cpp.s
 
+q3bsp/Q3BspLoader.o: q3bsp/Q3BspLoader.cpp.o
+.PHONY : q3bsp/Q3BspLoader.o
+
+# target to build an object file
+q3bsp/Q3BspLoader.cpp.o:
+	cd /Users/xackery/Documents/code/projects/eqx && $(MAKE) $(MAKESILENT) -f src/common/CMakeFiles/common.dir/build.make src/common/CMakeFiles/common.dir/q3bsp/Q3BspLoader.cpp.o
+.PHONY : q3bsp/Q3BspLoader.cpp.o
+
+q3bsp/Q3BspLoader.i: q3bsp/Q3BspLoader.cpp.i
+.PHONY : q3bsp/Q3BspLoader.i
+
+# target to preprocess a source file
+q3bsp/Q3BspLoader.cpp.i:
+	cd /Users/xackery/Documents/code/projects/eqx && $(MAKE) $(MAKESILENT) -f src/common/CMakeFiles/common.dir/build.make src/common/CMakeFiles/common.dir/q3bsp/Q3BspLoader.cpp.i
+.PHONY : q3bsp/Q3BspLoader.cpp.i
+
+q3bsp/Q3BspLoader.s: q3bsp/Q3BspLoader.cpp.s
+.PHONY : q3bsp/Q3BspLoader.s
+
+# target to generate assembly for a file
+q3bsp/Q3BspLoader.cpp.s:
+	cd /Users/xackery/Documents/code/projects/eqx && $(MAKE) $(MAKESILENT) -f src/common/CMakeFiles/common.dir/build.make src/common/CMakeFiles/common.dir/q3bsp/Q3BspLoader.cpp.s
+.PHONY : q3bsp/Q3BspLoader.cpp.s
+
+q3bsp/Q3BspMap.o: q3bsp/Q3BspMap.cpp.o
+.PHONY : q3bsp/Q3BspMap.o
+
+# target to build an object file
+q3bsp/Q3BspMap.cpp.o:
+	cd /Users/xackery/Documents/code/projects/eqx && $(MAKE) $(MAKESILENT) -f src/common/CMakeFiles/common.dir/build.make src/common/CMakeFiles/common.dir/q3bsp/Q3BspMap.cpp.o
+.PHONY : q3bsp/Q3BspMap.cpp.o
+
+q3bsp/Q3BspMap.i: q3bsp/Q3BspMap.cpp.i
+.PHONY : q3bsp/Q3BspMap.i
+
+# target to preprocess a source file
+q3bsp/Q3BspMap.cpp.i:
+	cd /Users/xackery/Documents/code/projects/eqx && $(MAKE) $(MAKESILENT) -f src/common/CMakeFiles/common.dir/build.make src/common/CMakeFiles/common.dir/q3bsp/Q3BspMap.cpp.i
+.PHONY : q3bsp/Q3BspMap.cpp.i
+
+q3bsp/Q3BspMap.s: q3bsp/Q3BspMap.cpp.s
+.PHONY : q3bsp/Q3BspMap.s
+
+# target to generate assembly for a file
+q3bsp/Q3BspMap.cpp.s:
+	cd /Users/xackery/Documents/code/projects/eqx && $(MAKE) $(MAKESILENT) -f src/common/CMakeFiles/common.dir/build.make src/common/CMakeFiles/common.dir/q3bsp/Q3BspMap.cpp.s
+.PHONY : q3bsp/Q3BspMap.cpp.s
+
+q3bsp/Q3BspPatch.o: q3bsp/Q3BspPatch.cpp.o
+.PHONY : q3bsp/Q3BspPatch.o
+
+# target to build an object file
+q3bsp/Q3BspPatch.cpp.o:
+	cd /Users/xackery/Documents/code/projects/eqx && $(MAKE) $(MAKESILENT) -f src/common/CMakeFiles/common.dir/build.make src/common/CMakeFiles/common.dir/q3bsp/Q3BspPatch.cpp.o
+.PHONY : q3bsp/Q3BspPatch.cpp.o
+
+q3bsp/Q3BspPatch.i: q3bsp/Q3BspPatch.cpp.i
+.PHONY : q3bsp/Q3BspPatch.i
+
+# target to preprocess a source file
+q3bsp/Q3BspPatch.cpp.i:
+	cd /Users/xackery/Documents/code/projects/eqx && $(MAKE) $(MAKESILENT) -f src/common/CMakeFiles/common.dir/build.make src/common/CMakeFiles/common.dir/q3bsp/Q3BspPatch.cpp.i
+.PHONY : q3bsp/Q3BspPatch.cpp.i
+
+q3bsp/Q3BspPatch.s: q3bsp/Q3BspPatch.cpp.s
+.PHONY : q3bsp/Q3BspPatch.s
+
+# target to generate assembly for a file
+q3bsp/Q3BspPatch.cpp.s:
+	cd /Users/xackery/Documents/code/projects/eqx && $(MAKE) $(MAKESILENT) -f src/common/CMakeFiles/common.dir/build.make src/common/CMakeFiles/common.dir/q3bsp/Q3BspPatch.cpp.s
+.PHONY : q3bsp/Q3BspPatch.cpp.s
+
 s3d_loader.o: s3d_loader.cpp.o
 .PHONY : s3d_loader.o
 
@@ -575,6 +647,15 @@ help:
 	@echo "... pfs_crc.o"
 	@echo "... pfs_crc.i"
 	@echo "... pfs_crc.s"
+	@echo "... q3bsp/Q3BspLoader.o"
+	@echo "... q3bsp/Q3BspLoader.i"
+	@echo "... q3bsp/Q3BspLoader.s"
+	@echo "... q3bsp/Q3BspMap.o"
+	@echo "... q3bsp/Q3BspMap.i"
+	@echo "... q3bsp/Q3BspMap.s"
+	@echo "... q3bsp/Q3BspPatch.o"
+	@echo "... q3bsp/Q3BspPatch.i"
+	@echo "... q3bsp/Q3BspPatch.s"
 	@echo "... s3d_loader.o"
 	@echo "... s3d_loader.i"
 	@echo "... s3d_loader.s"

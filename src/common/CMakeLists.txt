@@ -9,6 +9,9 @@ SET(common_sources
 	oriented_bounding_box.cpp
 	pfs.cpp
 	pfs_crc.cpp
+	q3bsp/Q3BspLoader.cpp
+	q3bsp/Q3BspMap.cpp
+	q3bsp/Q3BspPatch.cpp
 	s3d_loader.cpp
 	string_util.cpp
 	water_map.cpp
@@ -42,6 +45,12 @@ SET(common_headers
 	pfs_crc.h
 	placeable.h
 	placeable_group.h
+	q3bsp/Q3Bsp.hpp
+	q3bsp/Q3BspLoader.hpp
+	q3bsp/Q3BspMap.hpp
+	q3bsp/BspMap.hpp
+	q3bsp/Q3BspPatch.hpp
+	q3bsp/Q3BspRenderHelpers.hpp
 	safe_alloc.h
 	s3d_bsp.h
 	s3d_geometry.h

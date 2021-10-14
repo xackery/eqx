@@ -11,6 +11,7 @@
 #include "s3d_loader.h"
 #include "eqg_loader.h"
 #include "eqg_v4_loader.h"
+#include "q3bsp/Q3BspLoader.hpp"
 #include <stdint.h>
 #include <vector>
 #include <string>
@@ -40,7 +41,7 @@ int main(int argc, char **argv) {
 }
 
 
-bool parse(char* path) {
+bool parse(const char* path) {
 	printf("[INF] parsing %s\n", path);
 	if (extractPfs(path)) return true;
 
@@ -48,7 +49,7 @@ bool parse(char* path) {
 	return false;
 }
 
-bool extractPfs(char* path) {
+bool extractPfs(const char* path) {
 	filesystem::path fp = filesystem::path(path);
 	string ext = fp.extension();
 	string zone_name = fp.filename();	
@@ -100,6 +101,13 @@ bool extractPfs(char* path) {
 		}
 
 		printf("[INF] loaded as v4 eqg\n");
+		return true;
+	}
+	if (ext.compare(".bsp") > -1) {
+		
+		printf("[INF] detected as bsp q3 file\n");
+		Q3BspLoader loader;
+		BspMap  *m_q3map = loader.Load(path);
 		return true;
 	}
 

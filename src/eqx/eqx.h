@@ -1,2 +1,2 @@
-bool parse(char* path);
-bool extractPfs(char *path);
+bool parse(const char* path);
+bool extractPfs(const char *path);
