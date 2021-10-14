@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+bin/*
+*.dSYM/
+
+CMakeCache.txt
+build/*
+*.cmake
+CMakeFiles
+Makefile
