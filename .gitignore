@@ -38,4 +38,3 @@ CMakeCache.txt
 build/*
 *.cmake
 CMakeFiles
-Makefile

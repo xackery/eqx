@@ -51,16 +51,16 @@ bool parse(const char* path) {
 
 bool extractPfs(const char* path) {
 	filesystem::path fp = filesystem::path(path);
-	string ext = fp.extension();
-	string zone_name = fp.filename();	
+	string ext = fp.extension().string();
+	string zone_name = fp.filename().string();
 	if (fp.has_stem()) zone_name = fp.stem().string();
 
 	if (ext.compare(".s3d") > -1) {
 		printf("[INF] detected as s3d pfs file\n");
 		EQEmu::S3DLoader s3d;
-		std::vector<EQEmu::S3D::WLDFragment> zone_frags;
-		std::vector<EQEmu::S3D::WLDFragment> zone_object_frags;
-		std::vector<EQEmu::S3D::WLDFragment> object_frags;
+		vector<EQEmu::S3D::WLDFragment> zone_frags;
+		vector<EQEmu::S3D::WLDFragment> zone_object_frags;
+		vector<EQEmu::S3D::WLDFragment> object_frags;
 
 		if (!s3d.ParseWLDFile(zone_name + ".s3d", zone_name + ".wld", zone_frags)) {
 			printf("[INF] parse %s.s3d: %s.wld skipped\n", zone_name.c_str(), zone_name.c_str());
@@ -83,10 +83,10 @@ bool extractPfs(const char* path) {
 	if (ext.compare(".eqg") > -1) {
 		printf("[INF] detected as eqg pfs file\n");
 		EQEmu::EQGLoader eqg;
-		std::vector<std::shared_ptr<EQEmu::EQG::Geometry>> eqg_models;
-		std::vector<std::shared_ptr<EQEmu::Placeable>> eqg_placables;
-		std::vector<std::shared_ptr<EQEmu::EQG::Region>> eqg_regions;
-		std::vector<std::shared_ptr<EQEmu::Light>> eqg_lights;
+		vector<shared_ptr<EQEmu::EQG::Geometry>> eqg_models;
+		vector<shared_ptr<EQEmu::Placeable>> eqg_placables;
+		vector<shared_ptr<EQEmu::EQG::Region>> eqg_regions;
+		vector<shared_ptr<EQEmu::Light>> eqg_lights;
 
 		if (eqg.Load(zone_name, eqg_models, eqg_placables, eqg_regions, eqg_lights)) {
 			printf("[INF] loaded as standard eqg\n");
@@ -94,7 +94,7 @@ bool extractPfs(const char* path) {
 		}
 		printf("[INF] attempting to load %s.eqg as v4 eqg\n", zone_name.c_str());
 		EQEmu::EQG4Loader eqg4;
-		std::shared_ptr<EQEmu::EQG::Terrain> terrain;
+		shared_ptr<EQEmu::EQG::Terrain> terrain;
 		if (!eqg4.Load(zone_name, terrain)) {
 			printf("[INF] load eqg4 did not succeed\n");
 			return true;
@@ -108,6 +108,9 @@ bool extractPfs(const char* path) {
 		printf("[INF] detected as bsp q3 file\n");
 		Q3BspLoader loader;
 		BspMap  *m_q3map = loader.Load(path);
+		if (m_q3map == nullptr) {
+			printf("[INF] q3map null\n");
+		}
 		return true;
 	}
 
