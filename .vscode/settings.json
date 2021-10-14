@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.log": "ini",
+        "filesystem": "cpp",
+        "chrono": "cpp"
+    }
+}
