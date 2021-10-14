@@ -1,2 +1,4 @@
 # eqx
-EQ eXtractor
+EQ eXtractor and packer
+
+

@@ -60,6 +60,7 @@ SET(common_headers
 	event/background_task.h
 	event/event_loop.h
 	event/timer.h
+	toml.hpp
 )
 
 ADD_LIBRARY(common ${common_sources} ${common_headers})
