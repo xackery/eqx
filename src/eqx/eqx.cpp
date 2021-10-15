@@ -7,6 +7,8 @@
 #include <fstream>
 #include "compression.h"
 #include "log_macros.h"
+#include "log_stdout.h"
+#include "log_file.h"
 #include <gtc/matrix_transform.hpp>
 #include "s3d_loader.h"
 #include "eqg_loader.h"
@@ -24,7 +26,11 @@
 using namespace std;
 
 int main(int argc, char **argv) {
-	printf("eqx v0.0.1\n");
+	eqLogInit(62);
+	eqLogRegister(std::shared_ptr<EQEmu::Log::LogBase>(new EQEmu::Log::LogStdOut()));
+	eqLogRegister(std::shared_ptr<EQEmu::Log::LogBase>(new EQEmu::Log::LogFile("eqx.log")));
+	
+	eqLogMessage(LogInfo, "eqx v0.0.1");
 	
 	int i = 1;
 	bool ignore_collide_tex = true;
@@ -35,6 +41,15 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	try {
+		auto config = toml::parse_file("test.toml");
+		std::string_view library_name = config["library"]["name"].value_or("");
+		eqLogMessage(LogInfo, "library_name: %s", library_name);
+	} catch (const toml::parse_error& err) {
+		eqLogMessage(LogError, "parse test.toml: %s", err.description());
+		return 1;
+	}
+	
 	for(; i < argc; ++i) {
 		parse(argv[i]);
 	}
@@ -43,10 +58,10 @@ int main(int argc, char **argv) {
 
 
 bool parse(const char* path) {
-	printf("[INF] parsing %s\n", path);
+	eqLogMessage(LogInfo, "parsing %s");
 	if (extractPfs(path)) return true;
 
-	printf("[ERR] failed to parse %s: unknown type\n", path);
+	eqLogMessage(LogError, "failed to parse %s: unknown type");
 	return false;
 }
 
@@ -57,7 +72,7 @@ bool extractPfs(const char* path) {
 	if (fp.has_stem()) zone_name = fp.stem().string();
 
 	if (ext.compare(".s3d") > -1) {
-		printf("[INF] detected as s3d pfs file\n");
+		eqLogMessage(LogInfo, "detected as s3d pfs file");
 		EQEmu::S3DLoader s3d;
 		std::vector<EQEmu::S3D::WLDFragment> zone_frags;
 		std::vector<EQEmu::S3D::WLDFragment> zone_object_frags;
@@ -66,35 +81,35 @@ bool extractPfs(const char* path) {
 		EQEmu::PFS::Archive archive;
 		char *image_name = "lava001.bmp";
 		const std::vector<char> data = readFile(image_name);
-		printf("[INF] loaded %s %zd bytes\n", image_name, data.size());
+		eqLogMessage(LogInfo, "loaded %s %zd bytes", image_name, data.size());
 		if (!archive.Set(image_name, data)) {
-			printf("[ERR] failed to set %s\n", image_name);
+			eqLogMessage(LogError, "failed to set %s", image_name);
 		}
 		if (!archive.Save("test.s3d")) {
-			printf("[ERR] save failed\n");
+			eqLogMessage(LogError, "save failed");
 		}
 
 		if (!s3d.ParseWLDFile(zone_name + ".s3d", zone_name + ".wld", zone_frags)) {
-			printf("[INF] parse %s.s3d: %s.wld skipped\n", zone_name.c_str(), zone_name.c_str());
+			eqLogMessage(LogInfo, "parse %s.s3d: %s.wld skipped", zone_name.c_str(), zone_name.c_str());
 			return true;
 		}
 
 		if (!s3d.ParseWLDFile(zone_name + ".s3d", "objects.wld", zone_object_frags)) {
-			printf("[INF] parse %s.s3d: objects.wld skipped\n", zone_name.c_str());
+			eqLogMessage(LogInfo, "parse %s.s3d: objects.wld skipped", zone_name.c_str());
 			return true;
 		}
 
 		if (!s3d.ParseWLDFile(zone_name + "_obj.s3d", zone_name + "_obj.wld", object_frags)) {
-			printf("[INF] %s_obj.s3d: %s_obj.wld skipped\n", zone_name.c_str(), zone_name.c_str());
+			eqLogMessage(LogInfo, "%s_obj.s3d: %s_obj.wld skipped", zone_name.c_str(), zone_name.c_str());
 			return true;
 		}
 		
-		printf("[INF] loaded as s3d\n");
+		eqLogMessage(LogInfo, "loaded as s3d");
 		return true;
 	}
 
 	if (ext.compare(".eqg") > -1) {
-		printf("[INF] detected as eqg pfs file\n");
+		eqLogMessage(LogInfo, "detected as eqg pfs file");
 		EQEmu::EQGLoader eqg;
 		std::vector<shared_ptr<EQEmu::EQG::Geometry>> eqg_models;
 		std::vector<shared_ptr<EQEmu::Placeable>> eqg_placables;
@@ -102,30 +117,30 @@ bool extractPfs(const char* path) {
 		std::vector<shared_ptr<EQEmu::Light>> eqg_lights;
 
 		if (eqg.Load(zone_name, eqg_models, eqg_placables, eqg_regions, eqg_lights)) {
-			printf("[INF] loaded as standard eqg\n");
+			eqLogMessage(LogInfo, "loaded as standard eqg");
 			return true;
 		}
-		printf("[INF] attempting to load %s.eqg as v4 eqg\n", zone_name.c_str());
+		eqLogMessage(LogInfo, "attempting to load %s.eqg as v4 eqg", zone_name.c_str());
 		EQEmu::EQG4Loader eqg4;
 		shared_ptr<EQEmu::EQG::Terrain> terrain;
 		if (!eqg4.Load(zone_name, terrain)) {
-			printf("[INF] load eqg4 did not succeed\n");
+			eqLogMessage(LogInfo, "load eqg4 did not succeed");
 			return true;
 		}
 
-		printf("[INF] loaded as v4 eqg\n");
+		eqLogMessage(LogInfo, "loaded as v4 eqg");
 		return true;
 	}
 	if (ext.compare(".bsp") > -1) {
 		
-		printf("[INF] %s detected as bsp q3 file\n", path);
+		eqLogMessage(LogInfo, "%s detected as bsp q3 file", path);
 		Q3BspLoader loader;
 		Q3BspMap  *q3map = loader.Load(path);
 		if (q3map == nullptr) {
-			printf("[INF] q3map returned null, skipping\n");
+			eqLogMessage(LogInfo, "q3map returned null, skipping");
 			return true;
 		}
-		printf("[INF] found %zu brushes\n", q3map->brushes.size());
+		eqLogMessage(LogInfo, "found %zu brushes", q3map->brushes.size());
 		return true;
 	}
 
@@ -138,7 +153,7 @@ std::vector<char> readFile(const char* filename) {
     std::vector<char> vec;
     std::ifstream file(filename, std::ios::binary);
 	if (!file.is_open()) {
-		printf("[ERR] open %s failed: %s\n", filename, strerror(errno));
+		eqLogMessage(LogError, "open %s failed: %s", filename, strerror(errno));
 		return vec;
 	}
     file.unsetf(std::ios::skipws);

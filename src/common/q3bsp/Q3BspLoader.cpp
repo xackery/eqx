@@ -1,5 +1,6 @@
 #include "q3bsp/Q3BspLoader.hpp"
 #include <errno.h>
+#include "log_macros.h"
 
 Q3BspMap *Q3BspLoader::Load(const char *filename)
 {
@@ -7,7 +8,7 @@ Q3BspMap *Q3BspLoader::Load(const char *filename)
     BSP_OPEN(bspFile, filename);
 
     if (!BSP_IS_OPEN(bspFile)) {
-		printf("[ERR] open %s failed: %s\n", filename, strerror(errno));
+		eqLogMessage(LogError, "open %s failed: %s", filename, strerror(errno));
 		return nullptr;
 	}
 
@@ -19,7 +20,7 @@ Q3BspMap *Q3BspLoader::Load(const char *filename)
     bool validQ3Bsp = !strncmp(bspHeader.magic, "IBSP", 4) && (bspHeader.version == 0x2e);
 
     if (!validQ3Bsp) {
-		printf("[ERR] invalid q3bsp map\n");
+		eqLogMessage(LogError, "invalid q3bsp map");
 		return nullptr;
 	}
 

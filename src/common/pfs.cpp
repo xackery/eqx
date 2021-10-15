@@ -6,6 +6,7 @@
 #include <cstring>
 #include <tuple>
 #include <errno.h>
+#include "log_macros.h"
 
 #define MAX_BLOCK_SIZE 8192 // the client will crash if you make this bigger, so don't.
 
@@ -33,7 +34,7 @@ bool EQEmu::PFS::Archive::Open(std::string filename) {
 	std::vector<char> buffer;
 	FILE *f = fopen(filename.c_str(), "rb");
 	if (!f) {
-    	printf("[ERR] cannot open file '%s'\n", filename.c_str());
+    	eqLogMessage(LogError, "cannot open file '%s'", filename.c_str());
 		return false;
 	}
 
@@ -44,7 +45,7 @@ bool EQEmu::PFS::Archive::Open(std::string filename) {
 	buffer.resize(sz);
 	size_t res = fread(&buffer[0], 1, sz, f);
 	if (res != sz) {
-		printf("[ERR] fread buffer failed, malformed file\n");
+		eqLogMessage(LogError, "fread buffer failed, malformed file");
 		return false;
 	}
 
@@ -55,7 +56,7 @@ bool EQEmu::PFS::Archive::Open(std::string filename) {
 	ReadFromBufferLength(magic, 4, buffer, 4);
 
 	if(magic[0] != 'P' || magic[1] != 'F' || magic[2] != 'S' || magic[3] != ' ') {
-		printf("[ERR] magic word header mismatch\n");
+		eqLogMessage(LogError, "magic word header mismatch");
 		return false;
 	}
 
@@ -75,7 +76,7 @@ bool EQEmu::PFS::Archive::Open(std::string filename) {
 
 		std::vector<char> filename_buffer;
 		if(!InflateByFileOffset(offset, size, buffer, filename_buffer)) {
-			printf("[ERR] inflate directory failed\n");
+			eqLogMessage(LogError, "inflate directory failed");
 			return false;
 		}
 
@@ -110,7 +111,7 @@ bool EQEmu::PFS::Archive::Open(std::string filename) {
 				uint32_t size = std::get<2>((*iter));
 				std::string filename = std::get<1>((*f_iter));
 				if (!StoreBlocksByFileOffset(offset, size, buffer, filename)) {
-					printf("[ERR] store blocks by file offset failed\n");
+					eqLogMessage(LogError, "store blocks by file offset failed");
 					return false;
 				}
 
@@ -226,7 +227,7 @@ bool EQEmu::PFS::Archive::Save(std::string filename) {
 
 	FILE *f = fopen(filename.c_str(), "wb");
 	if (!f) {
-    	printf("[ERR] cannot open file '%s': %s\n", filename.c_str(), strerror(errno));
+    	eqLogMessage(LogError, "cannot open file '%s': %s", filename.c_str(), strerror(errno));
 		return false;
 	}
 	

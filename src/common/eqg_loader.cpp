@@ -62,7 +62,7 @@ bool EQEmu::EQGLoader::GetZon(std::string filename, std::vector<char> &buffer) {
 	
 	FILE *f = fopen(filename.c_str(), "rb");
 	if (!f) {
-		printf("[ERR] cannot open file '%s': %s\n", filename.c_str(), strerror(errno));
+		eqLogMessage(LogError, "cannot open file '%s': %s", filename.c_str(), strerror(errno));
 		return false;
 	}
 	fseek(f, 0, SEEK_END);
