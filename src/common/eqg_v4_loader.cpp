@@ -689,32 +689,34 @@ bool EQEmu::EQG4Loader::ParseInvwDat(EQEmu::PFS::Archive &archive, std::shared_p
 	return true;
 }
 
-bool EQEmu::EQG4Loader::GetZon(std::string file, std::vector<char> &buffer) {
+bool EQEmu::EQG4Loader::GetZon(std::string filneame, std::vector<char> &buffer) {
 	buffer.clear();
-	FILE *f = fopen(file.c_str(), "rb");
-	if (f) {
-		fseek(f, 0, SEEK_END);
-		size_t sz = ftell(f);
-		rewind(f);
-
-		if (sz != 0) {
-			buffer.resize(sz);
-
-			size_t bytes_read = fread(&buffer[0], 1, sz, f);
-
-			if (bytes_read != sz) {
-				fclose(f);
-				return false;
-			}
-			fclose(f);
-		}
-		else {
-			fclose(f);
-			return false;
-		}
-		return true;
+	FILE *f;
+	errno_t err;
+	err = fopen_s(&f, filneame.c_str(), "rb");
+	if (err != 0 ) {
+    	fprintf_s(stderr, "cannot open file '%s': %d\n", filneame.c_str(), err);
+		return false;
 	}
-	return false;
+
+	fseek(f, 0, SEEK_END);
+	size_t sz = ftell(f);
+	rewind(f);
+
+	if (sz == 0) {
+		fclose(f);
+		return false;
+	}
+	buffer.resize(sz);
+
+	size_t bytes_read = fread(&buffer[0], 1, sz, f);
+
+	if (bytes_read != sz) {
+		fclose(f);
+		return false;
+	}
+	fclose(f);
+	return true;
 }
 
 void EQEmu::EQG4Loader::ParseConfigFile(std::vector<char> &buffer, std::vector<std::string> &tokens) {

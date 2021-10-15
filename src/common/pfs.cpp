@@ -30,23 +30,25 @@ bool EQEmu::PFS::Archive::Open(std::string filename) {
 	Close();
 
 	std::vector<char> buffer;
-	FILE *f = fopen(filename.c_str(), "rb");
-	if (f) {
-		fseek(f, 0, SEEK_END);
-		size_t sz = ftell(f);
-		rewind(f);
-
-		buffer.resize(sz);
-		size_t res = fread(&buffer[0], 1, sz, f);
-		if (res != sz) {
-			return false;
-		}
-
-		fclose(f);
-	}
-	else {
+	FILE *f;
+	errno_t err;
+	err = fopen_s(&f, filename.c_str(), "rb");
+	if (err != 0 ) {
+    	fprintf_s(stderr, "cannot open file '%s': %d\n", filename.c_str(), err);
 		return false;
 	}
+
+	fseek(f, 0, SEEK_END);
+	size_t sz = ftell(f);
+	rewind(f);
+
+	buffer.resize(sz);
+	size_t res = fread(&buffer[0], 1, sz, f);
+	if (res != sz) {
+		return false;
+	}
+
+	fclose(f);
 
 	char magic[4];
 	ReadFromBuffer(uint32_t, dir_offset, buffer, 0);
@@ -215,18 +217,21 @@ bool EQEmu::PFS::Archive::Save(std::string filename) {
 		WriteToBuffer(int8_t, 'E', buffer, cur_dir_entry_offset + 4);
 		WriteToBuffer(uint32_t, footer_date, buffer, cur_dir_entry_offset + 5);
 	}
-	
-	FILE *f = fopen(filename.c_str(), "wb");
-	if(f) {
-		size_t sz = fwrite(&buffer[0], buffer.size(), 1, f);
-		if(sz != 1) {
-			fclose(f);
-			return false;
-		}
-		fclose(f);
-	} else {
+
+	FILE *f;
+	errno_t err;
+	err = fopen_s(&f, filename.c_str(), "rb");
+	if (err != 0 ) {
+    	fprintf_s(stderr, "cannot open file '%s': %d\n", filename.c_str(), err);
 		return false;
 	}
+	
+	size_t sz = fwrite(&buffer[0], buffer.size(), 1, f);
+	if(sz != 1) {
+		fclose(f);
+		return false;
+	}
+	fclose(f);
 
 	return true;
 }

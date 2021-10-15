@@ -56,30 +56,38 @@ bool EQEmu::EQGLoader::Load(std::string file, std::vector<std::shared_ptr<EQG::G
 	return true;
 }
 
-bool EQEmu::EQGLoader::GetZon(std::string file, std::vector<char> &buffer) {
+bool EQEmu::EQGLoader::GetZon(std::string filename, std::vector<char> &buffer) {
 	buffer.clear();
-	FILE *f = fopen(file.c_str(), "rb");
-	if(f) {
-		fseek(f, 0, SEEK_END);
-		size_t sz = ftell(f);
-		rewind(f);
+	FILE *f;
+	errno_t err;
+	err = fopen_s(&f, filename.c_str(), "rb");
+	if (err != 0 ) {
+    	fprintf_s(stderr, "cannot open file '%s': %d\n", filename.c_str(), err);
+		return false;
+	}
+	fseek(f, 0, SEEK_END);
+	size_t sz = ftell(f);
+	rewind(f);
 
-		if(sz != 0) {
-			buffer.resize(sz);
+	if (sz != 0)
+	{
+		buffer.resize(sz);
 
-			size_t bytes_read = fread(&buffer[0], 1, sz, f);
+		size_t bytes_read = fread(&buffer[0], 1, sz, f);
 
-			if(bytes_read != sz) {
-				fclose(f);
-				return false;
-			}
-			fclose(f);
-		} else {
+		if (bytes_read != sz)
+		{
 			fclose(f);
 			return false;
 		}
-		return true;
+		fclose(f);
 	}
+	else
+	{
+		fclose(f);
+		return false;
+	}
+	return true;
 	return false;
 }
 

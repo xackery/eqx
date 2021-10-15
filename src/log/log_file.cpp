@@ -20,7 +20,11 @@ void EQEmu::Log::LogFile::OnRegister(int enabled_logs) {
 		fp = nullptr;
 	}
 	
-	fp = fopen(file_name.c_str(), "w+b");
+	errno_t err;
+	err = fopen_s(&fp, file_name.c_str(), "rb");
+	if (err != 0 ) {
+    	fprintf_s(stderr, "cannot open file '%s': %d\n", file_name.c_str(), err);
+	}
 }
 
 void EQEmu::Log::LogFile::OnUnregister() {
