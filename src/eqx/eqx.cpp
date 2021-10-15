@@ -30,6 +30,10 @@ int main(int argc, char **argv) {
 	eqLogRegister(std::shared_ptr<EQEmu::Log::LogBase>(new EQEmu::Log::LogStdOut()));
 	eqLogRegister(std::shared_ptr<EQEmu::Log::LogBase>(new EQEmu::Log::LogFile("eqx.log")));
 	
+	if (argc <= 1) {
+		printf("usage: eqx <target>\n");
+		return 1;
+	}
 	eqLogMessage(LogInfo, "eqx v0.0.2");
 	
 	int i = 1;
@@ -40,7 +44,7 @@ int main(int argc, char **argv) {
 			i = 2;
 		}
 	}
-
+	
 	FILE *f = fopen("test.toml", "w");
 	if (!f) {
 		eqLogMessage(LogError, "failed to create test.toml");
@@ -48,26 +52,27 @@ int main(int argc, char **argv) {
 	}
 	fprintf(f, "# library represents XYZ\n");
 	fprintf(f, "[library]\n");
-	fprintf(f, "authors = ['Test']\n");
+	fprintf(f, "name = \"Test\"\n");
 	fclose(f);
 	
 	try {
 		auto config = toml::parse_file("test.toml");
 		const char* library_name = config["library"]["name"].value_or("");
 		eqLogMessage(LogInfo, "library_name: %s", library_name);
-		
+		/*
 		for (auto&& [k, v] : config) {
 			cout << k << endl;
 			v.visit([](auto& node) noexcept {
 				std::cout << node << "\n";				
 			});
-		}
+		}*/
 	} catch (const toml::parse_error& err) {
 		eqLogMessage(LogError, "parse test.toml: %s", err.description());
 		return 1;
 	}
 	
-	for(; i < argc; ++i) {
+	
+	for(i = 1; i < argc; ++i) {
 		parse(argv[i]);
 	}
 	return 0;
@@ -75,10 +80,10 @@ int main(int argc, char **argv) {
 
 
 bool parse(const char* path) {
-	eqLogMessage(LogInfo, "parsing %s");
+	eqLogMessage(LogInfo, "parsing %s", path);
 	if (extractPfs(path)) return true;
 
-	eqLogMessage(LogError, "failed to parse %s: unknown type");
+	eqLogMessage(LogError, "failed to parse %s: unknown type", path);
 	return false;
 }
 
@@ -89,7 +94,7 @@ bool extractPfs(const char* path) {
 	if (fp.has_stem()) zone_name = fp.stem().string();
 
 	if (ext.compare(".s3d") > -1) {
-		eqLogMessage(LogInfo, "detected as s3d pfs file");
+		eqLogMessage(LogInfo, "%s: s3d pfs file", path);
 		EQEmu::S3DLoader s3d;
 		std::vector<EQEmu::S3D::WLDFragment> zone_frags;
 		std::vector<EQEmu::S3D::WLDFragment> zone_object_frags;
@@ -98,7 +103,7 @@ bool extractPfs(const char* path) {
 		EQEmu::PFS::Archive archive;
 		char *image_name = "lava001.bmp";
 		const std::vector<char> data = readFile(image_name);
-		eqLogMessage(LogInfo, "loaded %s %zd bytes", image_name, data.size());
+		eqLogMessage(LogInfo, "%s: loaded %s %zd bytes", path, image_name, data.size());
 		if (!archive.Set(image_name, data)) {
 			eqLogMessage(LogError, "failed to set %s", image_name);
 		}
@@ -126,7 +131,7 @@ bool extractPfs(const char* path) {
 	}
 
 	if (ext.compare(".eqg") > -1) {
-		eqLogMessage(LogInfo, "detected as eqg pfs file");
+		eqLogMessage(LogInfo, "%s: detected as eqg pfs file", path);
 		EQEmu::EQGLoader eqg;
 		std::vector<shared_ptr<EQEmu::EQG::Geometry>> eqg_models;
 		std::vector<shared_ptr<EQEmu::Placeable>> eqg_placables;
@@ -134,22 +139,21 @@ bool extractPfs(const char* path) {
 		std::vector<shared_ptr<EQEmu::Light>> eqg_lights;
 
 		if (eqg.Load(zone_name, eqg_models, eqg_placables, eqg_regions, eqg_lights)) {
-			eqLogMessage(LogInfo, "loaded as standard eqg");
+			eqLogMessage(LogInfo, "%s: loaded as standard eqg", path);
 			return true;
 		}
-		eqLogMessage(LogInfo, "attempting to load %s.eqg as v4 eqg", zone_name.c_str());
 		EQEmu::EQG4Loader eqg4;
 		shared_ptr<EQEmu::EQG::Terrain> terrain;
 		if (!eqg4.Load(zone_name, terrain)) {
-			eqLogMessage(LogInfo, "load eqg4 did not succeed");
+			eqLogMessage(LogInfo, "load eqg4 was unable to load (unsupported type)");
 			return true;
 		}
 
 		eqLogMessage(LogInfo, "loaded as v4 eqg");
 		return true;
 	}
-	if (ext.compare(".bsp") > -1) {
-		
+
+	if (ext.compare(".bsp") > -1) {		
 		eqLogMessage(LogInfo, "%s detected as bsp q3 file", path);
 		Q3BspLoader loader;
 		Q3BspMap  *q3map = loader.Load(path);
@@ -160,8 +164,6 @@ bool extractPfs(const char* path) {
 		eqLogMessage(LogInfo, "found %zu brushes", q3map->brushes.size());
 		return true;
 	}
-
-	
 	return false;
 
 }
