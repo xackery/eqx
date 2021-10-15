@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
 	eqLogRegister(std::shared_ptr<EQEmu::Log::LogBase>(new EQEmu::Log::LogStdOut()));
 	eqLogRegister(std::shared_ptr<EQEmu::Log::LogBase>(new EQEmu::Log::LogFile("eqx.log")));
 	
-	eqLogMessage(LogInfo, "eqx v0.0.1");
+	eqLogMessage(LogInfo, "eqx v0.0.2");
 	
 	int i = 1;
 	bool ignore_collide_tex = true;
@@ -41,10 +41,27 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	FILE *f = fopen("test.toml", "w");
+	if (!f) {
+		eqLogMessage(LogError, "failed to create test.toml");
+		return 1;
+	}
+	fprintf(f, "# library represents XYZ\n");
+	fprintf(f, "[library]\n");
+	fprintf(f, "authors = ['Test']\n");
+	fclose(f);
+	
 	try {
 		auto config = toml::parse_file("test.toml");
-		std::string_view library_name = config["library"]["name"].value_or("");
+		const char* library_name = config["library"]["name"].value_or("");
 		eqLogMessage(LogInfo, "library_name: %s", library_name);
+		
+		for (auto&& [k, v] : config) {
+			cout << k << endl;
+			v.visit([](auto& node) noexcept {
+				std::cout << node << "\n";				
+			});
+		}
 	} catch (const toml::parse_error& err) {
 		eqLogMessage(LogError, "parse test.toml: %s", err.description());
 		return 1;
