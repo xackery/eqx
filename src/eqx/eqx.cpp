@@ -1,5 +1,5 @@
 #include <string.h>
-#include "stdio.h"
+#include <stdio.h>
 #include "eqx.h"
 #include "toml.hpp"
 #include <iostream>
@@ -13,6 +13,7 @@
 #include "eqg_v4_loader.h"
 #include "q3bsp/Q3BspLoader.hpp"
 #include <stdint.h>
+#include <filesystem>
 #include <vector>
 #include <string>
 #include <map>

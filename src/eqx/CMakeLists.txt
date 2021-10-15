@@ -7,6 +7,7 @@ SET(eqx_sources
 SET(eqx_headers
     eqx.h
 )
+
 FIND_PACKAGE(ZLIB REQUIRED)
 
 ADD_EXECUTABLE(eqx ${eqx_sources} ${eqx_headers})

@@ -18,7 +18,7 @@ clean:
 	@$(CC) $(CFLAGS) $< -c
 
 build-windows:
-	@x86_64-w64-mingw32-g++ -lz $(CFLAGS) -std=c++17 -Idependencies/glm/glm/ -Isrc/log/ -Isrc/common/ -o bin/eqx.exe src/eqx/eqx.cpp  $(COMMON_FILES) $(LOG_FILES)
+	@x86_64-w64-mingw32-g++ -lz -g -Wall  -std=c++17 -Idependencies/glm/glm/ -Isrc/log/ -Isrc/common/ -o bin/eqx.exe src/eqx/eqx.cpp  $(COMMON_FILES) $(LOG_FILES)
 
 build-linux:
 	@c++ $(CFLAGS) -std=c++17 -lz -Idependencies/glm/glm/ -Isrc/log/ -Isrc/common/ -o bin/eqx src/eqx/eqx.cpp $(COMMON_FILES) $(LOG_FILES)

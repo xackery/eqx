@@ -38,3 +38,5 @@ CMakeCache.txt
 build/*
 *.cmake
 CMakeFiles
+*.vcxproj
+*.vcxproj.filters
