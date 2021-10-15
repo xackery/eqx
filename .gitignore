@@ -40,3 +40,4 @@ build/*
 CMakeFiles
 *.vcxproj
 *.vcxproj.filters
+Makefile
