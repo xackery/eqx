@@ -11,7 +11,7 @@
 			"program": "${workspaceFolder}/build/bin/Debug/eqx.exe",
 			"args": ["clz.bsp", "clz.s3d"],
 			"stopAtEntry": false,
-			"cwd": "${fileDirname}",
+			"cwd": "${workspaceFolder}/build/bin/Debug/",
 			"environment": [],
 		},
     ]

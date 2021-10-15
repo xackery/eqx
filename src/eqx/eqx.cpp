@@ -63,6 +63,11 @@ bool extractPfs(const char* path) {
 		vector<EQEmu::S3D::WLDFragment> zone_object_frags;
 		vector<EQEmu::S3D::WLDFragment> object_frags;
 
+		EQEmu::PFS::Archive archive;
+		if (!archive.Save("test.s3d")) {
+			printf("[ERR] save failed\n");
+		}
+
 		if (!s3d.ParseWLDFile(zone_name + ".s3d", zone_name + ".wld", zone_frags)) {
 			printf("[INF] parse %s.s3d: %s.wld skipped\n", zone_name.c_str(), zone_name.c_str());
 			return true;
@@ -77,6 +82,7 @@ bool extractPfs(const char* path) {
 			printf("[INF] %s_obj.s3d: %s_obj.wld skipped\n", zone_name.c_str(), zone_name.c_str());
 			return true;
 		}
+		
 		printf("[INF] loaded as s3d\n");
 		return true;
 	}
@@ -106,12 +112,15 @@ bool extractPfs(const char* path) {
 	}
 	if (ext.compare(".bsp") > -1) {
 		
-		printf("[INF] detected as bsp q3 file\n");
+		printf("[INF] %s detected as bsp q3 file\n", path);
 		Q3BspLoader loader;
-		BspMap  *m_q3map = loader.Load(path);
-		if (m_q3map == nullptr) {
-			printf("[INF] q3map null\n");
+		Q3BspMap  *q3map = loader.Load(path);
+		if (q3map == nullptr) {
+			printf("[INF] q3map returned null, skipping\n");
+			return true;
 		}
+		printf("[INF] found %zu brushes\n", q3map->brushes.size());
+		printf("[ERR] test\n");
 		return true;
 	}
 

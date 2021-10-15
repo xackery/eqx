@@ -16,7 +16,7 @@ bool EQEmu::EQGLoader::Load(std::string file, std::vector<std::shared_ptr<EQG::G
 	// find zon file
 	EQEmu::PFS::Archive archive;
 	if(!archive.Open(file + ".eqg")) {
-		eqLogMessage(LogTrace, "Failed to open %s.eqg as a standard eqg file because the file does not exist.", file.c_str());
+		printf("open %s.eqg:  standard eqg file because the file does not exist.", file.c_str());
 		return false;
 	}
 
@@ -62,7 +62,7 @@ bool EQEmu::EQGLoader::GetZon(std::string filename, std::vector<char> &buffer) {
 	
 	FILE *f = fopen(filename.c_str(), "rb");
 	if (!f) {
-		fprintf(stderr, "cannot open file '%s': %s\n", filename.c_str(), strerror(errno));
+		printf("[ERR] cannot open file '%s': %s\n", filename.c_str(), strerror(errno));
 		return false;
 	}
 	fseek(f, 0, SEEK_END);

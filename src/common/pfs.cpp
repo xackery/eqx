@@ -33,7 +33,7 @@ bool EQEmu::PFS::Archive::Open(std::string filename) {
 	std::vector<char> buffer;
 	FILE *f = fopen(filename.c_str(), "rb");
 	if (!f) {
-    	fprintf(stderr, "cannot open file '%s'\n", filename.c_str());
+    	printf("[ERR] cannot open file '%s'\n", filename.c_str());
 		return false;
 	}
 
@@ -44,6 +44,7 @@ bool EQEmu::PFS::Archive::Open(std::string filename) {
 	buffer.resize(sz);
 	size_t res = fread(&buffer[0], 1, sz, f);
 	if (res != sz) {
+		printf("[ERR] fread buffer failed, malformed file\n");
 		return false;
 	}
 
@@ -54,6 +55,7 @@ bool EQEmu::PFS::Archive::Open(std::string filename) {
 	ReadFromBufferLength(magic, 4, buffer, 4);
 
 	if(magic[0] != 'P' || magic[1] != 'F' || magic[2] != 'S' || magic[3] != ' ') {
+		printf("[ERR] magic word header mismatch\n");
 		return false;
 	}
 
@@ -61,34 +63,37 @@ bool EQEmu::PFS::Archive::Open(std::string filename) {
 	std::vector<std::tuple<int32_t, uint32_t, uint32_t>> directory_entries;
 	std::vector<std::tuple<int32_t, std::string>> filename_entries;
 	for(uint32_t i = 0; i < dir_count; ++i) {
+
 		ReadFromBuffer(int32_t, crc, buffer, dir_offset + 4 + (i * 12));
 		ReadFromBuffer(uint32_t, offset, buffer, dir_offset + 8 + (i * 12));
 		ReadFromBuffer(uint32_t, size, buffer, dir_offset + 12 + (i * 12));
 
-		if (crc == 0x61580ac9) {
-			std::vector<char> filename_buffer;
-			if(!InflateByFileOffset(offset, size, buffer, filename_buffer)) {
-				return false;
-			}
-
-			uint32_t filename_pos = 0;
-			ReadFromBuffer(uint32_t, filename_count, filename_buffer, filename_pos);
-			filename_pos += 4;
-			for(uint32_t j = 0; j < filename_count; ++j) {
-				ReadFromBuffer(uint32_t, filename_length, filename_buffer, filename_pos);
-				filename_pos += 4;
-
-				std::string filename;
-				filename.resize(filename_length - 1);
-				ReadFromBufferLength(&filename[0], filename_length, filename_buffer, filename_pos);
-				filename_pos += filename_length;
-
-				std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
-				int32_t crc = EQEmu::PFS::CRC::Instance().Get(filename);
-				filename_entries.push_back(std::make_tuple(crc, filename));
-			}
-		} else {
+		if (crc != 0x61580ac9) {
 			directory_entries.push_back(std::make_tuple(crc, offset, size));
+			continue;
+		}
+
+		std::vector<char> filename_buffer;
+		if(!InflateByFileOffset(offset, size, buffer, filename_buffer)) {
+			printf("[ERR] inflate directory failed\n");
+			return false;
+		}
+
+		uint32_t filename_pos = 0;
+		ReadFromBuffer(uint32_t, filename_count, filename_buffer, filename_pos);
+		filename_pos += 4;
+		for(uint32_t j = 0; j < filename_count; ++j) {
+			ReadFromBuffer(uint32_t, filename_length, filename_buffer, filename_pos);
+			filename_pos += 4;
+
+			std::string filename;
+			filename.resize(filename_length - 1);
+			ReadFromBufferLength(&filename[0], filename_length, filename_buffer, filename_pos);
+			filename_pos += filename_length;
+
+			std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+			int32_t crc = EQEmu::PFS::CRC::Instance().Get(filename);
+			filename_entries.push_back(std::make_tuple(crc, filename));
 		}
 	}
 	
@@ -105,6 +110,7 @@ bool EQEmu::PFS::Archive::Open(std::string filename) {
 				uint32_t size = std::get<2>((*iter));
 				std::string filename = std::get<1>((*f_iter));
 				if (!StoreBlocksByFileOffset(offset, size, buffer, filename)) {
+					printf("[ERR] store blocks by file offset failed\n");
 					return false;
 				}
 
@@ -119,13 +125,14 @@ bool EQEmu::PFS::Archive::Open(std::string filename) {
 	uint32_t footer_offset = dir_offset + 4 + (12 * dir_count);
 	if (footer_offset == buffer.size()) {
 		footer = false;
-	} else {
-		char magic[5];
-		ReadFromBufferLength(magic, 5, buffer, footer_offset);
-		ReadFromBuffer(uint32_t, date, buffer, footer_offset + 5);
-		footer = true;
-		footer_date = date;
+		return true;
 	}
+
+	char footer_magic[5];
+	ReadFromBufferLength(footer_magic, 5, buffer, footer_offset);
+	ReadFromBuffer(uint32_t, date, buffer, footer_offset + 5);
+	footer = true;
+	footer_date = date;
 
 	return true;
 }
@@ -217,9 +224,9 @@ bool EQEmu::PFS::Archive::Save(std::string filename) {
 		WriteToBuffer(uint32_t, footer_date, buffer, cur_dir_entry_offset + 5);
 	}
 
-	FILE *f = fopen(filename.c_str(), "rb");
+	FILE *f = fopen(filename.c_str(), "wb");
 	if (!f) {
-    	fprintf(stderr, "cannot open file '%s': %s\n", filename.c_str(), strerror(errno));
+    	printf("[ERR] cannot open file '%s': %s\n", filename.c_str(), strerror(errno));
 		return false;
 	}
 	

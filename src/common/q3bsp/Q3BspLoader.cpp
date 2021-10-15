@@ -1,18 +1,15 @@
 #include "q3bsp/Q3BspLoader.hpp"
-
-#ifdef __ANDROID__
-extern AAssetManager *g_androidAssetMgr;
-#endif
+#include <errno.h>
 
 Q3BspMap *Q3BspLoader::Load(const char *filename)
 {
     BSP_INPUT_TYPE bspFile;
     BSP_OPEN(bspFile, filename);
 
-    if (!BSP_IS_OPEN(bspFile))
-    {
-        return new Q3BspMap(false);
-    }
+    if (!BSP_IS_OPEN(bspFile)) {
+		printf("[ERR] open %s failed: %s\n", filename, strerror(errno));
+		return nullptr;
+	}
 
     // bsp header
     Q3BspHeader bspHeader;
@@ -21,10 +18,10 @@ Q3BspMap *Q3BspLoader::Load(const char *filename)
     //validate the header
     bool validQ3Bsp = !strncmp(bspHeader.magic, "IBSP", 4) && (bspHeader.version == 0x2e);
 
-    if (!validQ3Bsp)
-    {
-        return new Q3BspMap(false);
-    }
+    if (!validQ3Bsp) {
+		printf("[ERR] invalid q3bsp map\n");
+		return nullptr;
+	}
 
     // header is valid - load the rest of the map
     Q3BspMap *q3map = new Q3BspMap(true);

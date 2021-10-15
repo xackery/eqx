@@ -23,7 +23,7 @@ void EQEmu::Log::LogFile::OnRegister(int enabled_logs) {
 	
 	fp = fopen(file_name.c_str(), "rb");
 	if (!fp) {		
-    	fprintf(stderr, "cannot open file '%s': %s\n", file_name.c_str(), strerror(errno));
+    	printf("[ERR] cannot open file '%s': %s\n", file_name.c_str(), strerror(errno));
 		return;
 	}
 }
