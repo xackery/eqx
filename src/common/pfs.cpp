@@ -5,6 +5,7 @@
 #include <cctype>
 #include <cstring>
 #include <tuple>
+#include <errno.h>
 
 #define MAX_BLOCK_SIZE 8192 // the client will crash if you make this bigger, so don't.
 
@@ -30,11 +31,9 @@ bool EQEmu::PFS::Archive::Open(std::string filename) {
 	Close();
 
 	std::vector<char> buffer;
-	FILE *f;
-	errno_t err;
-	err = fopen_s(&f, filename.c_str(), "rb");
-	if (err != 0 ) {
-    	fprintf_s(stderr, "cannot open file '%s': %d\n", filename.c_str(), err);
+	FILE *f = fopen(filename.c_str(), "rb");
+	if (!f) {
+    	fprintf(stderr, "cannot open file '%s'\n", filename.c_str());
 		return false;
 	}
 
@@ -218,11 +217,9 @@ bool EQEmu::PFS::Archive::Save(std::string filename) {
 		WriteToBuffer(uint32_t, footer_date, buffer, cur_dir_entry_offset + 5);
 	}
 
-	FILE *f;
-	errno_t err;
-	err = fopen_s(&f, filename.c_str(), "rb");
-	if (err != 0 ) {
-    	fprintf_s(stderr, "cannot open file '%s': %d\n", filename.c_str(), err);
+	FILE *f = fopen(filename.c_str(), "rb");
+	if (!f) {
+    	fprintf(stderr, "cannot open file '%s': %s\n", filename.c_str(), strerror(errno));
 		return false;
 	}
 	

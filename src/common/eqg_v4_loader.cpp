@@ -6,6 +6,7 @@
 #include "eqg_model_loader.h"
 #include "string_util.h"
 #include "log_macros.h"
+#include <errno.h>
 
 EQEmu::EQG4Loader::EQG4Loader() {
 }
@@ -689,13 +690,11 @@ bool EQEmu::EQG4Loader::ParseInvwDat(EQEmu::PFS::Archive &archive, std::shared_p
 	return true;
 }
 
-bool EQEmu::EQG4Loader::GetZon(std::string filneame, std::vector<char> &buffer) {
+bool EQEmu::EQG4Loader::GetZon(std::string filename, std::vector<char> &buffer) {
 	buffer.clear();
-	FILE *f;
-	errno_t err;
-	err = fopen_s(&f, filneame.c_str(), "rb");
-	if (err != 0 ) {
-    	fprintf_s(stderr, "cannot open file '%s': %d\n", filneame.c_str(), err);
+	FILE *f = fopen(filename.c_str(), "rb");
+	if (!f) {
+    	fprintf(stderr, "cannot open file '%s': %s\n", filename.c_str(), strerror(errno));
 		return false;
 	}
 
