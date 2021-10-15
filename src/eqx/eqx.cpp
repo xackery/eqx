@@ -59,11 +59,17 @@ bool extractPfs(const char* path) {
 	if (ext.compare(".s3d") > -1) {
 		printf("[INF] detected as s3d pfs file\n");
 		EQEmu::S3DLoader s3d;
-		vector<EQEmu::S3D::WLDFragment> zone_frags;
-		vector<EQEmu::S3D::WLDFragment> zone_object_frags;
-		vector<EQEmu::S3D::WLDFragment> object_frags;
+		std::vector<EQEmu::S3D::WLDFragment> zone_frags;
+		std::vector<EQEmu::S3D::WLDFragment> zone_object_frags;
+		std::vector<EQEmu::S3D::WLDFragment> object_frags;
 
 		EQEmu::PFS::Archive archive;
+		char *image_name = "lava001.bmp";
+		const std::vector<char> data = readFile(image_name);
+		printf("[INF] loaded %s %zd bytes\n", image_name, data.size());
+		if (!archive.Set(image_name, data)) {
+			printf("[ERR] failed to set %s\n", image_name);
+		}
 		if (!archive.Save("test.s3d")) {
 			printf("[ERR] save failed\n");
 		}
@@ -90,10 +96,10 @@ bool extractPfs(const char* path) {
 	if (ext.compare(".eqg") > -1) {
 		printf("[INF] detected as eqg pfs file\n");
 		EQEmu::EQGLoader eqg;
-		vector<shared_ptr<EQEmu::EQG::Geometry>> eqg_models;
-		vector<shared_ptr<EQEmu::Placeable>> eqg_placables;
-		vector<shared_ptr<EQEmu::EQG::Region>> eqg_regions;
-		vector<shared_ptr<EQEmu::Light>> eqg_lights;
+		std::vector<shared_ptr<EQEmu::EQG::Geometry>> eqg_models;
+		std::vector<shared_ptr<EQEmu::Placeable>> eqg_placables;
+		std::vector<shared_ptr<EQEmu::EQG::Region>> eqg_regions;
+		std::vector<shared_ptr<EQEmu::Light>> eqg_lights;
 
 		if (eqg.Load(zone_name, eqg_models, eqg_placables, eqg_regions, eqg_lights)) {
 			printf("[INF] loaded as standard eqg\n");
@@ -120,11 +126,31 @@ bool extractPfs(const char* path) {
 			return true;
 		}
 		printf("[INF] found %zu brushes\n", q3map->brushes.size());
-		printf("[ERR] test\n");
 		return true;
 	}
 
 	
 	return false;
 
+}
+
+std::vector<char> readFile(const char* filename) {	
+    std::vector<char> vec;
+    std::ifstream file(filename, std::ios::binary);
+	if (!file.is_open()) {
+		printf("[ERR] open %s failed: %s\n", filename, strerror(errno));
+		return vec;
+	}
+    file.unsetf(std::ios::skipws);
+    std::streampos fileSize;
+
+    file.seekg(0, std::ios::end);
+    fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    vec.reserve(fileSize);
+
+    vec.insert(vec.begin(), std::istream_iterator<char>(file), std::istream_iterator<char>());
+
+    return vec;
 }
