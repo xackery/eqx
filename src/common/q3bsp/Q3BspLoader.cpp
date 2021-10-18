@@ -77,6 +77,7 @@ void Q3BspLoader::LoadVisDataLump(Q3BspMap *map, BSP_INPUT_FILE bsp)
     BSP_READ(bsp, (char *)&(map->visData.sz_vecs), sizeof(int));
 
     int vecSize = map->visData.n_vecs * map->visData.sz_vecs;
+    if (vecSize < 1) return;
     map->visData.vecs = new unsigned char[vecSize];
 
     BSP_READ(bsp, (char *)(map->visData.vecs), vecSize * sizeof(unsigned char));

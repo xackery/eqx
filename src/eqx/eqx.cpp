@@ -108,9 +108,14 @@ void parse(const char* path) {
 		pfsExtract(path);
 		return;
 	}
+
+	if (ext == ".bsp") {
+		bspToWld(path);
+		return;
+	}
 	//if (extractPfs(path)) return true;
 
-	eqLogMessage(LogError, "failed to parse %s: unknown type", path);
+	eqLogMessage(LogInfo, "%s: unknown file extension, skipping", path);
 	return;
 }
 /*
@@ -245,7 +250,7 @@ void pfsExtract(const char* path) {
 	for (auto itr : filenames) {
 		vector<char> buf;
 		if (!archive.Get(itr, buf)) {
-			eqLogMessage(LogError, "%s Get %s: failed", path, itr);
+			eqLogMessage(LogError, "%s Get %s: failed", path, itr.c_str());
 			return;
 		}
 		string outFile = outPath;
@@ -255,7 +260,6 @@ void pfsExtract(const char* path) {
 	}
 	eqLogMessage(LogInfo, "%s extracted %d files to %s", path, extractCount, outPath.c_str());
 }
-
 
 void pfsCompress(const char* path) {	
 	EQEmu::PFS::Archive archive;
@@ -273,7 +277,7 @@ void pfsCompress(const char* path) {
 		const vector<char> data = readFile(filepath.path().string().c_str());
 		//eqLogMessage(LogInfo, "%s: loaded %s %zd bytes", path, filepath.path().string().c_str(), data.size());
 		if (!archive.Set(filename, data)) {
-			eqLogMessage(LogError, "%s: set %s: failed", path, filename);
+			eqLogMessage(LogError, "%s: set %s: failed", path, filename.c_str());
 			return;
 		}
 		compressCount++;
@@ -281,9 +285,20 @@ void pfsCompress(const char* path) {
 	string outPath = fp.string();
 	outPath = outPath.substr(1);
 	if (!archive.Save(outPath)) {
-		eqLogMessage(LogError, "%s: save %s: failed", path, outPath);
+		eqLogMessage(LogError, "%s: save %s: failed", path, outPath.c_str());
 		return;
 	}
 
 	eqLogMessage(LogInfo, "%s compressed %d files to %s", path, compressCount, outPath.c_str());
+}
+
+void bspToWld(const char* path) {
+	Q3BspLoader loader;
+	Q3BspMap  *q3map = loader.Load(path);	
+	if (q3map == nullptr) {
+		eqLogMessage(LogInfo, "q3map returned null, skipping");
+		return;
+	}
+	eqLogMessage(LogInfo, "%s: found %zu brushes", path, q3map->brushes.size());
+	return;
 }

@@ -41,3 +41,5 @@ CMakeFiles
 *.vcxproj
 *.vcxproj.filters
 Makefile
+eqx.log
+test.toml

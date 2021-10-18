@@ -5,7 +5,20 @@
     "version": "0.2.0",
     "configurations": [
 		{
-			"name": "(Windows) Launch",
+			"name": "(Mac) Debug",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin/eqx",
+			"stopAtEntry": false,
+			"cwd": "${fileDirname}",
+			"args": ["box.bsp"],
+			"environment": [],
+			"externalConsole": false,
+			"cwd": "${workspaceFolder}/bin/",
+			"MIMode": "lldb"
+		},
+		{
+			"name": "(Windows) Debug",
 			"type": "cppvsdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/build/bin/Debug/eqx.exe",
