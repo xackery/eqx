@@ -113,6 +113,11 @@ void parse(const char* path) {
 		bspToWld(path);
 		return;
 	}
+
+	if (ext == ".wld") {
+		wldToBsp(path);
+		return;
+	}
 	//if (extractPfs(path)) return true;
 
 	eqLogMessage(LogInfo, "%s: unknown file extension, skipping", path);
@@ -300,5 +305,20 @@ void bspToWld(const char* path) {
 		return;
 	}
 	eqLogMessage(LogInfo, "%s: found %zu brushes", path, q3map->brushes.size());
+	return;
+}
+
+void wldToBsp(const char* path) {
+	const vector<char> data = readFile(path);
+
+	EQEmu::S3DLoader s3d;
+	vector<EQEmu::S3D::WLDFragment> frags;
+
+	if (!s3d.ParseWLD(data, frags)) {
+		eqLogMessage(LogInfo, "%s: failed parse, skipping", path);
+		return;
+	}
+
+	eqLogMessage(LogInfo, "%s: found %d fragments", path, frags.size());
 	return;
 }

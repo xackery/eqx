@@ -20,8 +20,7 @@ EQEmu::S3DLoader::~S3DLoader() {
 bool EQEmu::S3DLoader::ParseWLDFile(std::string file_name, std::string wld_name, std::vector<S3D::WLDFragment> &out) {
 	out.clear();
 	std::vector<char> buffer;
-	char *current_hash;
-	bool old = false;
+	
 
 	EQEmu::PFS::Archive archive;
 	if (!archive.Open(file_name)) {
@@ -33,12 +32,18 @@ bool EQEmu::S3DLoader::ParseWLDFile(std::string file_name, std::string wld_name,
 		eqLogMessage(LogError, "%s: %s wld file not found", file_name.c_str(), wld_name.c_str());
 		return false;
 	}
+	return ParseWLD(buffer, out);
+}
 
+bool EQEmu::S3DLoader::ParseWLD(std::vector<char> buffer, std::vector<S3D::WLDFragment> &out) {	
 	size_t idx = 0;
+	char *current_hash;
+	bool old = false;
+
 	SafeStructAllocParse(wld_header, header);
 	
 	if (header->magic != 0x54503d02) {
-		eqLogMessage(LogError, "%s: header magic of %x did not match expected 0x54503d02", file_name.c_str(), header->magic);
+		eqLogMessage(LogError, "header magic of %x did not match expected 0x54503d02", header->magic);
 		return false;
 	}
 
@@ -52,7 +57,7 @@ bool EQEmu::S3DLoader::ParseWLDFile(std::string file_name, std::string wld_name,
 	out.clear();
 	out.reserve(header->fragments);
 
-	eqLogMessage(LogInfo, "%s: parsing %s fragments (%d total)", file_name.c_str(), wld_name.c_str(), header->fragments);
+	//eqLogMessage(LogInfo, "%s: parsing %s fragments (%d total)", file_name.c_str(), wld_name.c_str(), header->fragments);
 	for (uint32_t i = 0; i < header->fragments; ++i) {
 		SafeStructAllocParse(wld_fragment_header, frag_header);
 
