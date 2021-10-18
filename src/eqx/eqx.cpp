@@ -27,8 +27,8 @@ using namespace std;
 
 int main(int argc, char **argv) {
 	eqLogInit(62);
-	eqLogRegister(std::shared_ptr<EQEmu::Log::LogBase>(new EQEmu::Log::LogStdOut()));
-	eqLogRegister(std::shared_ptr<EQEmu::Log::LogBase>(new EQEmu::Log::LogFile("eqx.log")));
+	eqLogRegister(shared_ptr<EQEmu::Log::LogBase>(new EQEmu::Log::LogStdOut()));
+	eqLogRegister(shared_ptr<EQEmu::Log::LogBase>(new EQEmu::Log::LogFile("eqx.log")));
 	
 	if (argc <= 1) {
 		printf("usage: eqx <target>\n");
@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 		for (auto&& [k, v] : config) {
 			cout << k << endl;
 			v.visit([](auto& node) noexcept {
-				std::cout << node << "\n";				
+				cout << node << "\n";				
 			});
 		}*/
 	} catch (const toml::parse_error& err) {
@@ -79,30 +79,58 @@ int main(int argc, char **argv) {
 }
 
 
-bool parse(const char* path) {
+void parse(const char* path) {
+	if (strlen(path) < 2) return;
+
 	eqLogMessage(LogInfo, "parsing %s", path);
-	if (extractPfs(path)) return true;
+	filesystem::path fp = filesystem::path(path);
+	
+	string zone_name = fp.filename().string();
+	if (fp.has_stem()) zone_name = fp.stem().string();	
+	string ext = fp.extension().string();
+	if (ext == ".s3d") {
+		if (filesystem::is_directory(fp)) {			
+			if (fp.filename().string().find("_") != 0) {
+				eqLogMessage(LogWarn, "%s: folder must have prefix _ to be compressed, skipping", path);
+				return;
+			}
+			pfsCompress(path);
+			return;
+		}
+		pfsExtract(path);
+		return;
+	}
+	if (ext == ".eqg") {
+		if (filesystem::is_directory(fp)) {
+			pfsCompress(path);
+			return;
+		}
+		pfsExtract(path);
+		return;
+	}
+	//if (extractPfs(path)) return true;
 
 	eqLogMessage(LogError, "failed to parse %s: unknown type", path);
-	return false;
+	return;
 }
-
+/*
 bool extractPfs(const char* path) {
 	filesystem::path fp = filesystem::path(path);
-	string ext = fp.extension().string();
+	
 	string zone_name = fp.filename().string();
 	if (fp.has_stem()) zone_name = fp.stem().string();
 
 	if (ext.compare(".s3d") > -1) {
+		PfsExtract(path);
 		eqLogMessage(LogInfo, "%s: s3d pfs file", path);
 		EQEmu::S3DLoader s3d;
-		std::vector<EQEmu::S3D::WLDFragment> zone_frags;
-		std::vector<EQEmu::S3D::WLDFragment> zone_object_frags;
-		std::vector<EQEmu::S3D::WLDFragment> object_frags;
+		vector<EQEmu::S3D::WLDFragment> zone_frags;
+		vector<EQEmu::S3D::WLDFragment> zone_object_frags;
+		vector<EQEmu::S3D::WLDFragment> object_frags;
 
 		EQEmu::PFS::Archive archive;
 		char *image_name = "lava001.bmp";
-		const std::vector<char> data = readFile(image_name);
+		const vector<char> data = readFile(image_name);
 		eqLogMessage(LogInfo, "%s: loaded %s %zd bytes", path, image_name, data.size());
 		if (!archive.Set(image_name, data)) {
 			eqLogMessage(LogError, "failed to set %s", image_name);
@@ -133,10 +161,10 @@ bool extractPfs(const char* path) {
 	if (ext.compare(".eqg") > -1) {
 		eqLogMessage(LogInfo, "%s: detected as eqg pfs file", path);
 		EQEmu::EQGLoader eqg;
-		std::vector<shared_ptr<EQEmu::EQG::Geometry>> eqg_models;
-		std::vector<shared_ptr<EQEmu::Placeable>> eqg_placables;
-		std::vector<shared_ptr<EQEmu::EQG::Region>> eqg_regions;
-		std::vector<shared_ptr<EQEmu::Light>> eqg_lights;
+		vector<shared_ptr<EQEmu::EQG::Geometry>> eqg_models;
+		vector<shared_ptr<EQEmu::Placeable>> eqg_placables;
+		vector<shared_ptr<EQEmu::EQG::Region>> eqg_regions;
+		vector<shared_ptr<EQEmu::Light>> eqg_lights;
 
 		if (eqg.Load(zone_name, eqg_models, eqg_placables, eqg_regions, eqg_lights)) {
 			eqLogMessage(LogInfo, "%s: loaded as standard eqg", path);
@@ -167,24 +195,95 @@ bool extractPfs(const char* path) {
 	return false;
 
 }
+*/
 
-std::vector<char> readFile(const char* filename) {	
-    std::vector<char> vec;
-    std::ifstream file(filename, std::ios::binary);
+vector<char> readFile(const char* filename) {	
+    vector<char> vec;
+    ifstream file(filename, ios::binary);
 	if (!file.is_open()) {
 		eqLogMessage(LogError, "open %s failed: %s", filename, strerror(errno));
 		return vec;
 	}
-    file.unsetf(std::ios::skipws);
-    std::streampos fileSize;
+    file.unsetf(ios::skipws);
+    streampos fileSize;
 
-    file.seekg(0, std::ios::end);
+    file.seekg(0, ios::end);
     fileSize = file.tellg();
-    file.seekg(0, std::ios::beg);
+    file.seekg(0, ios::beg);
 
     vec.reserve(fileSize);
 
-    vec.insert(vec.begin(), std::istream_iterator<char>(file), std::istream_iterator<char>());
-
+    vec.insert(vec.begin(), istream_iterator<char>(file), istream_iterator<char>());
     return vec;
+}
+
+void writeFile(const char* filename, vector<char> data) {
+    ofstream fout(filename, ios::out | ios::binary);
+	for (auto d : data) {
+		fout.write(&d, 1);
+	}
+	fout.close();
+}
+
+void pfsExtract(const char* path) {
+	EQEmu::PFS::Archive archive;
+	if (!archive.Open(path)) {
+		eqLogMessage(LogError, "%s open failed", path);
+		return;
+	}
+	vector<string> filenames;
+	if (!archive.GetFilenames("", filenames)) {
+		eqLogMessage(LogError, "%s: GetFilenames: failed", path);
+		return;
+	}
+	filesystem::path fp = filesystem::path(path);
+	auto outPath = fp.parent_path().string();	
+	outPath.append("_" + fp.filename().string() + "/");
+	filesystem::create_directories(outPath);
+
+	int extractCount = 0;
+	for (auto itr : filenames) {
+		vector<char> buf;
+		if (!archive.Get(itr, buf)) {
+			eqLogMessage(LogError, "%s Get %s: failed", path, itr);
+			return;
+		}
+		string outFile = outPath;
+		outFile.append(itr);
+		writeFile(outFile.c_str(), buf);
+		extractCount++;
+	}
+	eqLogMessage(LogInfo, "%s extracted %d files to %s", path, extractCount, outPath.c_str());
+}
+
+
+void pfsCompress(const char* path) {	
+	EQEmu::PFS::Archive archive;
+
+	auto fp = filesystem::path(path);
+
+	//printf("base path: %s\n", fp.string().c_str());
+	int compressCount = 0;
+	for (auto const& filepath: filesystem::directory_iterator{fp}) {
+		string inPath = path;
+		string filename = filepath.path().filename().string();
+		//printf("loading %s and saving as %s\n", filepath.path().string().c_str(), filename.c_str());
+		inPath.append("/");
+		inPath.append(filename);
+		const vector<char> data = readFile(filepath.path().string().c_str());
+		//eqLogMessage(LogInfo, "%s: loaded %s %zd bytes", path, filepath.path().string().c_str(), data.size());
+		if (!archive.Set(filename, data)) {
+			eqLogMessage(LogError, "%s: set %s: failed", path, filename);
+			return;
+		}
+		compressCount++;
+	}
+	string outPath = fp.string();
+	outPath = outPath.substr(1);
+	if (!archive.Save(outPath)) {
+		eqLogMessage(LogError, "%s: save %s: failed", path, outPath);
+		return;
+	}
+
+	eqLogMessage(LogInfo, "%s compressed %d files to %s", path, compressCount, outPath.c_str());
 }
