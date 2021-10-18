@@ -29,169 +29,169 @@ public:
 	EQEmu::Any data;
 };
 
-class WLDFragment03 : public WLDFragment
+class BitmapName : public WLDFragment
 {
 public:
-	WLDFragment03(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment03() { }
+	BitmapName(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~BitmapName() { }
 
 	std::shared_ptr<Texture> GetData() { try { return EQEmu::any_cast<std::shared_ptr<Texture>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<Texture>(); } }
 };
 
-class WLDFragment04 : public WLDFragment
+class BitmapInfo : public WLDFragment
 {
 public:
-	WLDFragment04(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment04() { }
+	BitmapInfo(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~BitmapInfo() { }
 
 	std::shared_ptr<TextureBrush> GetData() { try { return EQEmu::any_cast<std::shared_ptr<TextureBrush>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<TextureBrush>(); } }
 };
 
-class WLDFragment05 : public WLDFragment
+class BitmapInfoReference : public WLDFragment
 {
 public:
-	WLDFragment05(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment05() { }
+	BitmapInfoReference(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~BitmapInfoReference() { }
 
 	uint32_t GetData() { try { return EQEmu::any_cast<uint32_t>(data); } catch (EQEmu::bad_any_cast&) { return 0; } }
 };
 
-class WLDFragment10 : public WLDFragment
+class SkeletonHierarchy : public WLDFragment
 {
 public:
-	WLDFragment10(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment10() { }
+	SkeletonHierarchy(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~SkeletonHierarchy() { }
 
 	std::shared_ptr<SkeletonTrack> GetData() { try { return EQEmu::any_cast<std::shared_ptr<SkeletonTrack>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<SkeletonTrack>(); } }
 };
 
-class WLDFragment11 : public WLDFragment
+class SkeletonHierarchyReference : public WLDFragment
 {
 public:
-	WLDFragment11(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment11() { }
+	SkeletonHierarchyReference(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~SkeletonHierarchyReference() { }
 
 	uint32_t GetData() { try { return EQEmu::any_cast<uint32_t>(data); } catch (EQEmu::bad_any_cast&) { return 0; } }
 };
 
-class WLDFragment12 : public WLDFragment
+class TrackDefFragment : public WLDFragment
 {
 public:
-	WLDFragment12(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment12() { }
+	TrackDefFragment(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~TrackDefFragment() { }
 
 	std::shared_ptr<SkeletonTrack::BoneOrientation> GetData() { try { return EQEmu::any_cast<std::shared_ptr<SkeletonTrack::BoneOrientation>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<SkeletonTrack::BoneOrientation>(); } }
 };
 
-class WLDFragment13 : public WLDFragment
+class TrackFragment : public WLDFragment
 {
 public:
-	WLDFragment13(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment13() { }
+	TrackFragment(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~TrackFragment() { }
 
 	uint32_t GetData() { try { return EQEmu::any_cast<uint32_t>(data); } catch (EQEmu::bad_any_cast&) { return 0; } }
 };
 
-class WLDFragment14 : public WLDFragment
+class Actor : public WLDFragment
 {
 public:
-	WLDFragment14(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment14() { }
+	Actor(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~Actor() { }
 
 	std::shared_ptr<WLDFragmentReference> GetData() { try { return EQEmu::any_cast<std::shared_ptr<WLDFragmentReference>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<WLDFragmentReference>(); } }
 };
 
-class WLDFragment15 : public WLDFragment
+class ObjectInstance : public WLDFragment
 {
 public:
-	WLDFragment15(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment15() { }
+	ObjectInstance(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~ObjectInstance() { }
 
 	std::shared_ptr<Placeable> GetData() { try { return EQEmu::any_cast<std::shared_ptr<Placeable>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<Placeable>(); } }
 };
 
-class WLDFragment1B : public WLDFragment
+class LightSource : public WLDFragment
 {
 public:
-	WLDFragment1B(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment1B() { }
+	LightSource(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~LightSource() { }
 
 	std::shared_ptr<Light> GetData() { try { return EQEmu::any_cast<std::shared_ptr<Light>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<Light>(); } }
 };
 
-class WLDFragment1C : public WLDFragment
+class LightSourceReference : public WLDFragment
 {
 public:
-	WLDFragment1C(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment1C() { }
+	LightSourceReference(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~LightSourceReference() { }
 
 	uint32_t GetData() { try { return EQEmu::any_cast<uint32_t>(data); } catch (EQEmu::bad_any_cast&) { return 0; } }
 };
 
-class WLDFragment21 : public WLDFragment
+class  BspTree : public WLDFragment
 {
 public:
-	WLDFragment21(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment21() { }
+	 BspTree(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~ BspTree() { }
 
 	std::shared_ptr<S3D::BSPTree> GetData() { try { return EQEmu::any_cast<std::shared_ptr<S3D::BSPTree>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<S3D::BSPTree>(); } }
 };
 
-class WLDFragment22 : public WLDFragment
+class BspRegion : public WLDFragment
 {
 public:
-	WLDFragment22(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment22() { }
+	BspRegion(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~BspRegion() { }
 };
 
-class WLDFragment28 : public WLDFragment
+class LightInstance : public WLDFragment
 {
 public:
-	WLDFragment28(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment28() { }
+	LightInstance(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~LightInstance() { }
 };
 
-class WLDFragment29 : public WLDFragment
+class BspRegionType : public WLDFragment
 {
 public:
-	WLDFragment29(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment29() { }
+	BspRegionType(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~BspRegionType() { }
 
-	std::shared_ptr<S3D::BSPRegion> GetData() { try { return EQEmu::any_cast<std::shared_ptr<S3D::BSPRegion>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<S3D::BSPRegion>(); } }
+	std::shared_ptr<S3D::BspRegionType> GetData() { try { return EQEmu::any_cast<std::shared_ptr<S3D::BspRegionType>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<S3D::BspRegionType>(); } }
 };
 
-class WLDFragment2D : public WLDFragment
+class MeshReference : public WLDFragment
 {
 public:
-	WLDFragment2D(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment2D() { }
+	MeshReference(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~MeshReference() { }
 
 	uint32_t GetData() { try { return EQEmu::any_cast<uint32_t>(data); } catch (EQEmu::bad_any_cast&) { return 0; } }
 };
 
-class WLDFragment30 : public WLDFragment
+class Material : public WLDFragment
 {
 public:
-	WLDFragment30(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment30() { }
+	Material(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~Material() { }
 
 	std::shared_ptr<TextureBrush> GetData() { try { return EQEmu::any_cast<std::shared_ptr<TextureBrush>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<TextureBrush>(); } }
 };
 
-class WLDFragment31 : public WLDFragment
+class MaterialList : public WLDFragment
 {
 public:
-	WLDFragment31(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment31() { }
+	MaterialList(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~MaterialList() { }
 
 	std::shared_ptr<TextureBrushSet> GetData() { try { return EQEmu::any_cast<std::shared_ptr<TextureBrushSet>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<TextureBrushSet>(); } }
 };
 
-class WLDFragment36 : public WLDFragment
+class Mesh : public WLDFragment
 {
 public:
-	WLDFragment36(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~WLDFragment36() { }
+	Mesh(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~Mesh() { }
 
 	std::shared_ptr<Geometry> GetData() { try { return EQEmu::any_cast<std::shared_ptr<Geometry>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<Geometry>(); } }
 };
