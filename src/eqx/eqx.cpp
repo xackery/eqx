@@ -385,10 +385,7 @@ void gltfToWld(const char* path) {
 		eqLogMessage(LogError, "%s: failed parse, skipping", path);
 		return;
 	}
-
-	for (auto mesh: model.meshes) {
-		printf("mesh %s\n", mesh.name.c_str());
-	}
+	gltfModelToWld(path, model);
 	return;
 }
 
@@ -416,13 +413,10 @@ void glbToWld(const char* path) {
 		return;
 	}
 
-	for (auto mesh: model.meshes) {
-		printf("mesh %s\n", mesh.name.c_str());
-	}
-
+	gltfModelToWld(path, model);
 	return;
 }
 
-void gltfMeshToWld(const char *path) {
-	printf("todo: gltf mesh to wld\n");
+void gltfModelToWld(const char *path, Model model) {
+	printf("todo: gltf model to wld\n");
 }
