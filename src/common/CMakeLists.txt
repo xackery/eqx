@@ -38,13 +38,17 @@ SET(common_headers
 	eqg_terrain_tile.h
 	eqg_v4_loader.h
 	eqg_water_sheet.h
+	gltf/json.hpp
+	gltf/stb_image_write.h
+	gltf/stb_image.h
+	gltf/tiny_gltf.h
 	light.h
 	octree.h
 	oriented_bounding_box.h
 	pfs.h
 	pfs_crc.h
 	placeable.h
-	placeable_group.h
+	placeable_group.h	
 	q3bsp/Q3Bsp.hpp
 	q3bsp/Q3BspLoader.hpp
 	q3bsp/Q3BspMap.hpp

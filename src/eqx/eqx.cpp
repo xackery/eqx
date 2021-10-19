@@ -118,7 +118,16 @@ void parse(const char* path) {
 		wldToBsp(path);
 		return;
 	}
-	//if (extractPfs(path)) return true;
+
+	if (ext == ".gltf") {
+		gltfToWld(path);
+		return;
+	}
+	
+	if (ext == ".glb") {
+		glbToWld(path);
+		return;
+	}
 
 	eqLogMessage(LogInfo, "%s: unknown file extension, skipping", path);
 	return;
@@ -298,13 +307,21 @@ void pfsCompress(const char* path) {
 }
 
 void bspToWld(const char* path) {
+	const float q3Scale = 5;
+	vector<EQEmu::S3D::WLDFragment> frags;
+
 	Q3BspLoader loader;
 	Q3BspMap  *q3map = loader.Load(path);	
 	if (q3map == nullptr) {
 		eqLogMessage(LogInfo, "q3map returned null, skipping");
 		return;
 	}
-	eqLogMessage(LogInfo, "%s: found %zu brushes", path, q3map->brushes.size());
+	eqLogMessage(LogInfo, "%s: found %zu vertices", path, q3map->vertices.size());
+
+	for (auto vert: q3map->vertices) {
+		printf("%0.2f, %0.2f, %0.2f\n", vert.position.x*q3Scale, vert.position.y*q3Scale, vert.position.z*q3Scale);
+		return;
+	}
 	return;
 }
 
@@ -320,5 +337,84 @@ void wldToBsp(const char* path) {
 	}
 
 	eqLogMessage(LogInfo, "%s: found %d fragments", path, frags.size());
+	for (auto frag:frags) {
+		if (frag.type != 0x22) {
+			printf("0x%x fragment, ", frag.type);
+			continue;
+		}
+		EQEmu::S3D::Mesh &f = reinterpret_cast<EQEmu::S3D::Mesh&>(frag);
+		auto model = f.GetData();
+		eqLogMessage(LogInfo, "%s: first mesh fragment (0x36) vertices is %d", path, model->GetVertices().size());
+		
+		for (auto vert: model->GetVertices()) {
+		//	printf("%0.2f, %0.2f, %0.2f\n", vert.pos.x, vert.pos.y, vert.pos.z);
+			continue;
+		}
+	}
 	return;
+}
+
+void gltfToWld(const char* path) {
+	Model model;
+	TinyGLTF loader;
+	string err;
+	string warn;
+	
+	
+	bool resp = loader.LoadASCIIFromFile(&model, &err, &warn, path);
+	//bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, argv[1]); // for binary glTF(.glb)
+
+	if (!warn.empty()) {
+		eqLogMessage(LogWarn, "%s: %s", path, warn.c_str());
+	}
+
+	if (!err.empty()) {
+		eqLogMessage(LogError, "%s: %s", path, err.c_str());
+		return;
+	}
+
+	if (!resp) {
+		eqLogMessage(LogError, "%s: failed parse, skipping", path);
+		return;
+	}
+
+	for (auto mesh: model.meshes) {
+		printf("mesh %s\n", mesh.name.c_str());
+	}
+	return;
+}
+
+
+void glbToWld(const char* path) {
+	Model model;
+	TinyGLTF loader;
+	string err;
+	string warn;
+	
+	
+	bool resp = loader.LoadBinaryFromFile(&model, &err, &warn, path);
+
+	if (!warn.empty()) {
+		eqLogMessage(LogWarn, "%s: %s", path, warn.c_str());
+	}
+
+	if (!err.empty()) {
+		eqLogMessage(LogError, "%s: %s", path, err.c_str());
+		return;
+	}
+
+	if (!resp) {
+		eqLogMessage(LogError, "%s: failed parse, skipping", path);
+		return;
+	}
+
+	for (auto mesh: model.meshes) {
+		printf("mesh %s\n", mesh.name.c_str());
+	}
+
+	return;
+}
+
+void gltfMeshToWld(const char *path) {
+	printf("todo: gltf mesh to wld\n");
 }

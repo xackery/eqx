@@ -342,7 +342,7 @@ EQEmu::S3D::LightInstance::LightInstance(std::vector<WLDFragment> &out, char *fr
 	catch (EQEmu::bad_any_cast&) {}
 }
 
-// BspRegionType is 0x29, representing BSP data
+// BspRegionType is 0x29
 EQEmu::S3D::BspRegionType::BspRegionType(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	wld_fragment_29 *header = (wld_fragment_29*)frag_buffer;
 	frag_buffer += sizeof(wld_fragment_29);

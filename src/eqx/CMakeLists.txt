@@ -5,7 +5,7 @@ SET(eqx_sources
 )
 
 SET(eqx_headers
-    eqx.h
+	eqx.h
 )
 
 FIND_PACKAGE(ZLIB REQUIRED)
