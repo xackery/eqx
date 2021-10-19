@@ -23,6 +23,14 @@
 #define GLM_FORCE_RADIANS
 #include <glm.hpp>
 
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STBI_MSC_SECURE_CRT
+
+#include "gltf/tiny_gltf.h"
+using namespace tinygltf;
+
 using namespace std;
 
 int main(int argc, char **argv) {
@@ -123,7 +131,7 @@ void parse(const char* path) {
 		gltfToWld(path);
 		return;
 	}
-	
+
 	if (ext == ".glb") {
 		glbToWld(path);
 		return;
