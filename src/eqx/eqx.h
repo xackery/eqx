@@ -12,3 +12,4 @@ void writeFile(const char* filename, vector<char> data);
 void gltfToWld(const char *path);
 void glbToWld(const char *path);
 void gltfModelToWld(const char *path, tinygltf::Model model);
+bool ifind(const string &strHaystack, const string &strNeedle);

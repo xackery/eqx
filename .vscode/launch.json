@@ -22,7 +22,7 @@
 			"type": "cppvsdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/build/bin/Debug/eqx.exe",
-			"args": ["clz.bsp", "clz.s3d"],
+			"args": ["box.gltf", "box.glb"],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/build/bin/Debug/",
 			"environment": [],

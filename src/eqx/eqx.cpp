@@ -418,5 +418,76 @@ void glbToWld(const char* path) {
 }
 
 void gltfModelToWld(const char *path, Model model) {
-	printf("todo: gltf model to wld\n");
+	auto wldModel(new EQEmu::S3D::Geometry());
+	wldModel->SetName(path);
+	for (auto node: model.nodes) {
+		if (ifind(node.name, "light")) continue; //printf("%s %0.2f %0.2f %0.2f\n", node.name.c_str(), node.translation[0], node.translation[1], node.translation[2]);
+		if (ifind(node.name, "camera")) continue;
+		if (node.translation.size() == 0) continue;
+		printf("%s node %0.2f, %0.2f, %0.2f\n", node.name.c_str(), node.translation[0], node.translation[1], node.translation[2]);
+		
+		if (model.meshes.size() < node.mesh) {
+			eqLogMessage(LogWarn, "node %s refers to mesh %d, which is larger than meshes (%d)", node.name.c_str(), node.mesh, model.meshes.size());			
+			return;
+		}
+		for (auto prim: model.meshes[node.mesh].primitives) {
+			if (model.materials.size() < prim.material) {
+				eqLogMessage(LogWarn, "node %s refers to mesh %d material %d, which is larger than materials (%d)", node.name.c_str(), node.mesh, prim.material, model.materials.size());				
+				return;
+			}
+			printf("%s node mesh %d material %d name is %s\n", node.name.c_str(), node.mesh, prim.material, model.materials[prim.material].name.c_str());
+			//prim.mode default is 4, triangles, but 0: points, 1: lines, 2: line_loop, 3: line_strip, 4: triangles, 5: triangle_strip, 6: triangle_fan			
+			if (prim.mode != 4) {
+				eqLogMessage(LogWarn, "node %s refers to mesh %d and stores data as mode %d, which is not yet supported", node.name.c_str(), node.mesh, prim.mode);
+				return;
+			}
+
+			//https://github.com/andreasdr/tdme2/blob/f76444c2d6568fee75ed1f61514f77f73c41e7a4/src/tdme/engine/fileio/models/GLTFReader.cpp#L442
+			for (auto kv = prim.attributes.begin(); kv != prim.attributes.end(); kv++) {
+				printf("attr: %s\n", kv->first.c_str());
+				if (kv->first._Equal("POSITION")) {
+					auto accessor = model.accessors[kv->second];
+					if (accessor.type == (int)TINYGLTF_TYPE_VEC3) {
+						eqLogMessage(LogWarn, "node %s refers to mesh %d attr %s value %d type %d, which is not VEC3 (3)",  node.name.c_str(), node.mesh, kv->first.c_str(), kv->second, accessor.type);				
+						return;
+					}
+					
+				}
+			}
+
+			if (model.accessors.size() < prim.indices)
+			{
+				eqLogMessage(LogWarn, "node %s refers to mesh %d indice %d, which is larger than accessors (%d)", node.name.c_str(), node.mesh, prim.indices, model.accessors.size());
+				return;
+			}
+
+			auto accessor = model.accessors[prim.indices];
+
+			if (model.bufferViews.size() < accessor.bufferView) {
+				eqLogMessage(LogWarn, "node %s refers to mesh %d indices %d bufferViews %d, which is larger than buffViews (%d)", node.name.c_str(), node.mesh, prim.indices, accessor.bufferView, model.accessors.size());				
+				return;
+			}
+			if (accessor.type == TINYGLTF_TYPE_VEC3) {
+				eqLogMessage(LogWarn, "node %s refers to mesh %d indices %d bufferViews %d type %d, which is not VEC3 (3)", node.name.c_str(), node.mesh, prim.indices, accessor.bufferView, accessor.type);				
+				return;
+			}
+
+			//auto bufferView = model.bufferViews[accessor.bufferView];
+			
+
+		}
+
+		
+	}
+
+	//wldModel->AddVert();
+}
+
+bool ifind(const string & strHaystack, const string & strNeedle) {
+  auto it = search(
+    strHaystack.begin(), strHaystack.end(),
+    strNeedle.begin(),   strNeedle.end(),
+    [](char ch1, char ch2) { return toupper(ch1) == toupper(ch2); }
+  );
+  return (it != strHaystack.end() );
 }
