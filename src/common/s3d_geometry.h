@@ -34,11 +34,11 @@ public:
 
 	void SetName(std::string nname) { name = nname; }
 	void SetTextureBrushSet(std::shared_ptr<TextureBrushSet> tbs) { tex = tbs; }
-	void AddVert(Vertex vert) { verts.push_back(vert); }
+	void AddVertex(Vertex vert) { verts.push_back(vert); }
 	void AddPolygon(Polygon poly) { polys.push_back(poly); }
 	std::vector<Vertex> &GetVertices() { return verts; }
 	std::vector<Polygon> &GetPolygons() { return polys; }
-	std::string &GetName() { return name; }
+	std::string &GetName() { return name; }	
 	std::shared_ptr<TextureBrushSet> GetTextureBrushSet() { return tex; }
 private:
 	std::vector<Vertex> verts;

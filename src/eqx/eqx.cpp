@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
 void parse(const char* path) {
 	if (strlen(path) < 2) return;
 
-	eqLogMessage(LogInfo, "parsing %s", path);
+	eqLogMessage(LogInfo, "%s: parsing", path);
 	filesystem::path fp = filesystem::path(path);
 	
 	string zone_name = fp.filename().string();
@@ -424,6 +424,7 @@ void glbToWld(const char* path) {
 void gltfModelToWld(const char *path, Model model) {
 	auto wldModel(new EQEmu::S3D::Geometry());
 	wldModel->SetName(path);
+	vector<EQEmu::S3D::WLDFragment> wldFile;
 	
 	for (size_t n = 0; n < model.nodes.size(); n++) {
 		auto node = model.nodes[n];
@@ -447,12 +448,20 @@ void gltfModelToWld(const char *path, Model model) {
 			}
 			std::map<std::string, int>::const_iterator it(primitive.attributes.begin());
     		std::map<std::string, int>::const_iterator itEnd(primitive.attributes.end());
+
+			int start = 0;
+			
+			auto vertex(new EQEmu::S3D::Geometry::Vertex());
+
 			for (; it != itEnd; it++) {
 				if (it->second < 0) {
 					eqLogMessage(LogWarn, "%s: mesh %d primitive %d attribute %s is negative (%d), ignoring", path, node.mesh, p, it->first.c_str(), it->second);
 					continue;
 				}
+				
       			const tinygltf::Accessor &accessor = model.accessors[it->second];
+				auto& attributeBufferView = model.bufferViews[accessor.bufferView];
+				auto& attributeBuffer = model.buffers[attributeBufferView.buffer];
 				int size = 1;
 				if (accessor.type == TINYGLTF_TYPE_SCALAR) {
 					size = 1;
@@ -466,7 +475,44 @@ void gltfModelToWld(const char *path, Model model) {
 					eqLogMessage(LogWarn, "%s: mesh %d primitive %d attribute %s accessor type is %d and unsupported, ignoring", path, node.mesh, p, it->first.c_str(), accessor.type);
 					continue;
 				}
-				
+				if (it->first.compare("POSITION") != 0) {
+					if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+						eqLogMessage(LogWarn, "%s: mesh %d primitive %d attribute %s componentType is not float, ignoring", path, node.mesh, p, it->first.c_str(), accessor.type);
+						continue;
+					}
+					
+					const float* bufferData = (const float*)(attributeBuffer.data.data() + accessor.byteOffset + attributeBufferView.byteOffset);
+					for (auto i = 0; i < accessor.count; i++) {
+						vertex->nor.x = bufferData[i * 3 + 0];
+						vertex->nor.y = bufferData[i * 3 + 1];
+						vertex->nor.z = bufferData[i * 3 + 2];
+					}
+				}
+				if (it->first.compare("NORMAL") != 0) {
+					if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+						eqLogMessage(LogWarn, "%s: mesh %d primitive %d attribute %s componentType is not float, ignoring", path, node.mesh, p, it->first.c_str(), accessor.type);
+						continue;
+					}
+					
+					const float* bufferData = (const float*)(attributeBuffer.data.data() + accessor.byteOffset + attributeBufferView.byteOffset);
+					for (auto i = 0; i < accessor.count; i++) {
+						vertex->pos.x = bufferData[i * 3 + 0];
+						vertex->pos.y = bufferData[i * 3 + 1];
+						vertex->pos.z = bufferData[i * 3 + 2];
+					}
+				}
+				if (it->first.compare("TEXCOORD_0") != 0) {
+					if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+						eqLogMessage(LogWarn, "%s: mesh %d primitive %d attribute %s componentType is not float, ignoring", path, node.mesh, p, it->first.c_str(), accessor.type);
+						continue;
+					}
+					
+					const float* bufferData = (const float*)(attributeBuffer.data.data() + accessor.byteOffset + attributeBufferView.byteOffset);
+					for (auto i = 0; i < accessor.count; i++) {
+						vertex->tex.x = bufferData[i * 2 + 0];
+						vertex->tex.y = bufferData[i * 2 + 1];
+					}
+				}
 				if ((it->first.compare("POSITION") != 0) &&
 					(it->first.compare("NORMAL") != 0) &&
 					(it->first.compare("TEXCOORD_0") != 0)) continue;
@@ -478,21 +524,13 @@ void gltfModelToWld(const char *path, Model model) {
 					eqLogMessage(LogWarn, "%s: mesh %d primitive %d attribute %s has no buffer, ignoring", path, node.mesh, p, it->first.c_str(), accessor.type);
 					continue;
 				}
-
 				eqLogMessage(LogWarn, "%s: mesh %d primitive %d attribute %s", path, node.mesh, p, it->first.c_str(), accessor.type);
-
-
-				
-				
-				/*glVertexAttribPointer(gGLProgramState.attribs[it->first], size,
-										accessor.componentType,
-										accessor.normalized ? GL_TRUE : GL_FALSE,
-										byteStride, BUFFER_OFFSET(accessor.byteOffset));
-				CheckErrors("vertex attrib pointer");
-				glEnableVertexAttribArray(gGLProgramState.attribs[it->first]);
-				CheckErrors("enable vertex attrib array");
-				}*/
 			}
+
+			//https://github.com/andreasdr/tdme2/blob/f76444c2d6568fee75ed1f61514f77f73c41e7a4/src/tdme/engine/fileio/models/GLTFReader.cpp#L442
+
+			
+			wldModel->AddVertex(*vertex);			
 
 
 			/*
@@ -532,13 +570,12 @@ void gltfModelToWld(const char *path, Model model) {
 
 			//auto bufferView = model.bufferViews[accessor.bufferView];
 			*/
-
-		}
-
-		
+		}		
 	}
+	wldFile.push_back(wldModel);
 
-	//wldModel->AddVert();
+	
+	eqLogMessage(LogInfo, "added %d vert", wldModel->GetVertices().size());
 }
 
 bool ifind(const string & strHaystack, const string & strNeedle) {

@@ -3,7 +3,11 @@
         {
             "name": "Mac",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "${default}",
+                "${workspaceFolder}/src/common",
+                "${workspaceFolder}/dependencies/glm/glm",
+                "${workspaceFolder}/src/log"
             ],
             "cStandard": "gnu17",
             "cppStandard": "gnu++17",
