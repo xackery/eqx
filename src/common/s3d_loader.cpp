@@ -120,21 +120,21 @@ bool EQEmu::S3DLoader::ParseWLD(std::vector<char> buffer, std::vector<S3D::WLDFr
 				 break;
 			}
 			case 0x15: {
-				S3D::ObjectInstance f(out, &buffer[idx], frag_header->size, frag_header->name_ref, current_hash, old);
+				S3D::ActorInstance f(out, &buffer[idx], frag_header->size, frag_header->name_ref, current_hash, old);
 				f.type = frag_header->id;
 				f.name = frag_header->name_ref;
 				out.push_back(f);
 				break;
 			}
 			case 0x1B: {
-				S3D::LightSource f(out, &buffer[idx], frag_header->size, frag_header->name_ref, current_hash, old);
+				S3D::LightDefinition f(out, &buffer[idx], frag_header->size, frag_header->name_ref, current_hash, old);
 				f.type = frag_header->id;
 				f.name = frag_header->name_ref;
 				out.push_back(f);
 				break;
 			}
 			case 0x1C: {
-				S3D::LightSourceReference f(out, &buffer[idx], frag_header->size, frag_header->name_ref, current_hash, old);
+				S3D::LightDefinitionReference f(out, &buffer[idx], frag_header->size, frag_header->name_ref, current_hash, old);
 				f.type = frag_header->id;
 				f.name = frag_header->name_ref;
 				out.push_back(f);
@@ -155,14 +155,14 @@ bool EQEmu::S3DLoader::ParseWLD(std::vector<char> buffer, std::vector<S3D::WLDFr
 				break;
 			}
 			case 0x28: {
-				S3D::LightInstance f(out, &buffer[idx], frag_header->size, frag_header->name_ref, current_hash, old);
+				S3D::PointLight f(out, &buffer[idx], frag_header->size, frag_header->name_ref, current_hash, old);
 				f.type = frag_header->id;
 				f.name = frag_header->name_ref;
 				out.push_back(f);
 				break;
 			}
 			case 0x29: {
-				S3D::BspRegionType f(out, &buffer[idx], frag_header->size, frag_header->name_ref, current_hash, old);
+				S3D::Zone f(out, &buffer[idx], frag_header->size, frag_header->name_ref, current_hash, old);
 				f.type = frag_header->id;
 				f.name = frag_header->name_ref;
 				out.push_back(f);

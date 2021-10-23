@@ -11,16 +11,16 @@ EQ eXtractor and packer
 // TODO: CameraReference is 0x09
 // SkeletonHierarchy is 0x10
 // SkeletonHierarchyReference is 0x11
-// TrackDefFragment is 0x12
-// TrackFragment is 0x13
+// TrackDefinition is 0x12
+// TrackInstance is 0x13
 // Actor fragments 0x14
-// ObjectInstance is 0x15
-// LightSource is 0x1B
-// LightSourceReference is 0x1C
+// ActorInstance is 0x15
+// LightDefinition is 0x1B
+// LightDefinitionReference is 0x1C
 //  BspTree is 0x21
 // BspRegion is 0x22 
-// LightInstance is 0x28
-// BspRegionType is 0x29
+// PointLight is 0x28
+// Zone is 0x29
 // TODO: AmbientLight is 0x2A
 // TODO: LegacyMesh is 0x2C
 // MeshReference is 0x2D

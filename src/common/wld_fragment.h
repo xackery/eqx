@@ -74,20 +74,20 @@ public:
 	uint32_t GetData() { try { return EQEmu::any_cast<uint32_t>(data); } catch (EQEmu::bad_any_cast&) { return 0; } }
 };
 
-class TrackDefFragment : public WLDFragment
+class TrackDefinition : public WLDFragment
 {
 public:
-	TrackDefFragment(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~TrackDefFragment() { }
+	TrackDefinition(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~TrackDefinition() { }
 
 	std::shared_ptr<SkeletonTrack::BoneOrientation> GetData() { try { return EQEmu::any_cast<std::shared_ptr<SkeletonTrack::BoneOrientation>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<SkeletonTrack::BoneOrientation>(); } }
 };
 
-class TrackFragment : public WLDFragment
+class TrackInstance : public WLDFragment
 {
 public:
-	TrackFragment(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~TrackFragment() { }
+	TrackInstance(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~TrackInstance() { }
 
 	uint32_t GetData() { try { return EQEmu::any_cast<uint32_t>(data); } catch (EQEmu::bad_any_cast&) { return 0; } }
 };
@@ -101,29 +101,29 @@ public:
 	std::shared_ptr<WLDFragmentReference> GetData() { try { return EQEmu::any_cast<std::shared_ptr<WLDFragmentReference>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<WLDFragmentReference>(); } }
 };
 
-class ObjectInstance : public WLDFragment
+class ActorInstance : public WLDFragment
 {
 public:
-	ObjectInstance(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~ObjectInstance() { }
+	ActorInstance(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~ActorInstance() { }
 
 	std::shared_ptr<Placeable> GetData() { try { return EQEmu::any_cast<std::shared_ptr<Placeable>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<Placeable>(); } }
 };
 
-class LightSource : public WLDFragment
+class LightDefinition : public WLDFragment
 {
 public:
-	LightSource(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~LightSource() { }
+	LightDefinition(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~LightDefinition() { }
 
 	std::shared_ptr<Light> GetData() { try { return EQEmu::any_cast<std::shared_ptr<Light>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<Light>(); } }
 };
 
-class LightSourceReference : public WLDFragment
+class LightDefinitionReference : public WLDFragment
 {
 public:
-	LightSourceReference(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~LightSourceReference() { }
+	LightDefinitionReference(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~LightDefinitionReference() { }
 
 	uint32_t GetData() { try { return EQEmu::any_cast<uint32_t>(data); } catch (EQEmu::bad_any_cast&) { return 0; } }
 };
@@ -144,20 +144,20 @@ public:
 	~BspRegion() { }
 };
 
-class LightInstance : public WLDFragment
+class PointLight : public WLDFragment
 {
 public:
-	LightInstance(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~LightInstance() { }
+	PointLight(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~PointLight() { }
 };
 
-class BspRegionType : public WLDFragment
+class Zone : public WLDFragment
 {
 public:
-	BspRegionType(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
-	~BspRegionType() { }
+	Zone(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old);
+	~Zone() { }
 
-	std::shared_ptr<S3D::BspRegionType> GetData() { try { return EQEmu::any_cast<std::shared_ptr<S3D::BspRegionType>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<S3D::BspRegionType>(); } }
+	std::shared_ptr<S3D::Zone> GetData() { try { return EQEmu::any_cast<std::shared_ptr<S3D::Zone>>(data); } catch (EQEmu::bad_any_cast&) { return std::shared_ptr<S3D::Zone>(); } }
 };
 
 class MeshReference : public WLDFragment

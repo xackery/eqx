@@ -2,7 +2,8 @@
 #include "wld_structs.h"
 #include "s3d_loader.h"
 
-
+// TODO: DEFAULTPALETTEFILE is 0x01
+// TODO: USERDATA is 0x02
 // BitmapName is 0x03
 EQEmu::S3D::BitmapName::BitmapName(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	wld_fragment03 *header = (wld_fragment03*)frag_buffer;
@@ -28,7 +29,7 @@ EQEmu::S3D::BitmapName::BitmapName(std::vector<WLDFragment> &out, char *frag_buf
 	data = tex;
 }
 
-// BitmapInfo is 0x04
+// BitmapInfo aka SIMPLESPRITEDEF is 0x04
 EQEmu::S3D::BitmapInfo::BitmapInfo(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	wld_fragment04 *header = (wld_fragment04*)frag_buffer;
 	frag_buffer += sizeof(wld_fragment04);
@@ -60,22 +61,34 @@ EQEmu::S3D::BitmapInfo::BitmapInfo(std::vector<WLDFragment> &out, char *frag_buf
 	data = brush;
 }
 
-// BitmapInfoReference is 0x05
+// BitmapInfoReference aka SIMPLESPRITEINST is 0x05
 EQEmu::S3D::BitmapInfoReference::BitmapInfoReference(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	wld_fragment_reference *ref = (wld_fragment_reference*)frag_buffer;
 	uint32_t frag_id = ref->id - 1;
 	data = frag_id;
 }
 
-// TODO: 0x06 Only found in gequip files. Seems to represent 2d sprites in the world (coins).
+// TODO: 2DSPRITEDEF 0x06 Only found in gequip files. Seems to represent 2d sprites in the world (coins).
 
 // TODO: Fragment7 is 0x07, only found in gequip files. This fragment can be referenced by an actor fragment.
 
-// TODO: Camera is 0x08
+// TODO: 3DSPRITEDEF Camera is 0x08
 
-// TODO: CameraReference is 0x09
+// TODO: CameraReference is 0x09 Related to 3DSPRITEDEF, Maybe the 3DSPRITETAG to map the string. When I added a second ACTION to ACTORINST test, a second 0x09 was added. maybe from the 3DSPRITE %s. bodies are both compressed to 0 1 0
 
-// SkeletonHierarchy is 0x10
+// TODO: 4DSPRITEDEF - 0xa
+
+// TODO: FUN_004079a0 - 0xb
+
+// TODO: PARTICLESPRITEDEF - 0xc
+
+// TODO: Unknown 0xd
+
+// TODO: COMPOSITESPRITEDEF 0xe
+
+// TODO: Unknown 0xf
+
+// SkeletonHierarchy aka HIERARCHICALSPRITEDEF is 0x10 
 EQEmu::S3D::SkeletonHierarchy::SkeletonHierarchy(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	wld_fragment10 *header = (wld_fragment10*)frag_buffer;
 	frag_buffer += sizeof(wld_fragment10);
@@ -114,10 +127,10 @@ EQEmu::S3D::SkeletonHierarchy::SkeletonHierarchy(std::vector<WLDFragment> &out, 
 			bone->model = mod;
 
 			if (ent->frag_ref != 0) {
-				TrackFragment &f_oref = reinterpret_cast<TrackFragment&>(out[ent->frag_ref - 1]);
+				TrackInstance &f_oref = reinterpret_cast<TrackInstance&>(out[ent->frag_ref - 1]);
 				auto or_ref = f_oref.GetData();
 
-				TrackDefFragment &fori = reinterpret_cast<TrackDefFragment&>(out[or_ref]);
+				TrackDefinition &fori = reinterpret_cast<TrackDefinition&>(out[or_ref]);
 				auto orient = fori.GetData();
 
 				bone->orientation = orient;
@@ -176,8 +189,8 @@ EQEmu::S3D::SkeletonHierarchyReference::SkeletonHierarchyReference(std::vector<W
 	data = frag_id;
 }
 
-// TrackDefFragment is 0x12
-EQEmu::S3D::TrackDefFragment::TrackDefFragment(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
+// TrackDefinition is 0x12
+EQEmu::S3D::TrackDefinition::TrackDefinition(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	std::shared_ptr<SkeletonTrack::BoneOrientation> orientation(new SkeletonTrack::BoneOrientation);
 	wld_fragment12 *header = (wld_fragment12*)frag_buffer;
 
@@ -193,14 +206,14 @@ EQEmu::S3D::TrackDefFragment::TrackDefFragment(std::vector<WLDFragment> &out, ch
 	data = orientation;
 }
 
-// TrackFragment is 0x13
-EQEmu::S3D::TrackFragment::TrackFragment(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
+// TrackInstance is 0x13
+EQEmu::S3D::TrackInstance::TrackInstance(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	wld_fragment_reference *ref = (wld_fragment_reference*)frag_buffer;
 	uint32_t frag_id = ref->id - 1;
 	data = frag_id;
 }
 
-// Actor fragments 0x14
+// Actor aka ActorDef 0x14
 EQEmu::S3D::Actor::Actor(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	wld_fragment14 *header = (wld_fragment14*)frag_buffer;
 	frag_buffer += sizeof(wld_fragment14);
@@ -238,8 +251,8 @@ EQEmu::S3D::Actor::Actor(std::vector<WLDFragment> &out, char *frag_buffer, uint3
 	data = ref;
 }
 
-// ObjectInstance is 0x15
-EQEmu::S3D::ObjectInstance::ObjectInstance(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
+// ActorInstance aka ObjectInstance is 0x15
+EQEmu::S3D::ActorInstance::ActorInstance(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	wld_fragment_reference *ref = (wld_fragment_reference*)frag_buffer;
 	frag_buffer += sizeof(wld_fragment_reference);
 
@@ -260,8 +273,18 @@ EQEmu::S3D::ObjectInstance::ObjectInstance(std::vector<WLDFragment> &out, char *
 	}
 }
 
-// LightSource is 0x1B
-EQEmu::S3D::LightSource::LightSource(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
+// TODO: ACTORINSTANCETEST 0x16
+
+// TODO: POLYHEDRONDEFINITION 0x17
+
+// TODO: unknown 0x18
+
+// TODO: SPHERELISTDEFINITION  0x19
+
+// TODO: unknown 0x1A
+
+// LightDefinition aka LightSource is 0x1B
+EQEmu::S3D::LightDefinition::LightDefinition(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	std::shared_ptr<Light> light(new Light());
 	wld_fragment1B *header = (wld_fragment1B*)frag_buffer;
 
@@ -277,14 +300,22 @@ EQEmu::S3D::LightSource::LightSource(std::vector<WLDFragment> &out, char *frag_b
 	data = light;
 }
 
-// LightSourceReference is 0x1C
-EQEmu::S3D::LightSourceReference::LightSourceReference(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
+// LightDefinitionReference is 0x1C
+EQEmu::S3D::LightDefinitionReference::LightDefinitionReference(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	wld_fragment_reference *ref = (wld_fragment_reference*)frag_buffer;
 	uint32_t frag_id = ref->id - 1;
 	data = frag_id;
 }
 
-//  BspTree is 0x21
+// TODO: Pointlight is 0x1D
+
+// TODO: unknown 0x1E
+
+// TODO: SoundDefinition is 0x1F
+
+// TODO: SoundInstance is 0x20
+
+//  BspTree aka WorldTree is 0x21
 EQEmu::S3D:: BspTree:: BspTree(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	wld_fragment21 *header = (wld_fragment21*)frag_buffer;
 	frag_buffer += sizeof(wld_fragment21);
@@ -310,13 +341,23 @@ EQEmu::S3D:: BspTree:: BspTree(std::vector<WLDFragment> &out, char *frag_buffer,
 	data = tree;
 }
 
-// BspRegion is 0x22 
+// BspRegion aka Region is 0x22 
 EQEmu::S3D::BspRegion::BspRegion(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	//bsp regions
 }
 
-// LightInstance is 0x28
-EQEmu::S3D::LightInstance::LightInstance(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
+// TODO: ACTIVEGEOMETRYREGION is 0x23
+
+// TODO: SKYREGION is 0x24
+
+// TODO: DIRECTIONALLIGHT is 0x25
+
+// TODO: BLITSPRITEDEFINITION is 0x26
+
+// TODO: unknown is 0x27
+
+// PointLight aka LightInstance is 0x28
+EQEmu::S3D::PointLight::PointLight(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	wld_fragment_reference *ref = (wld_fragment_reference*)frag_buffer;
 	frag_buffer += sizeof(wld_fragment_reference);
 
@@ -342,8 +383,8 @@ EQEmu::S3D::LightInstance::LightInstance(std::vector<WLDFragment> &out, char *fr
 	catch (EQEmu::bad_any_cast&) {}
 }
 
-// BspRegionType is 0x29
-EQEmu::S3D::BspRegionType::BspRegionType(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
+// Zone aka BspRegionType is 0x29
+EQEmu::S3D::Zone::Zone(std::vector<WLDFragment> &out, char *frag_buffer, uint32_t frag_length, uint32_t frag_name, char *hash, bool old) {
 	wld_fragment_29 *header = (wld_fragment_29*)frag_buffer;
 	frag_buffer += sizeof(wld_fragment_29);
 
@@ -370,6 +411,8 @@ EQEmu::S3D::BspRegionType::BspRegionType(std::vector<WLDFragment> &out, char *fr
 }
 
 // TODO: AmbientLight is 0x2A
+
+// TODO: DirectionalLight is 0x2B
 
 // TODO: LegacyMesh is 0x2C
 
