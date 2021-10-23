@@ -160,7 +160,7 @@ EQEmu::S3D::SkeletonHierarchy::SkeletonHierarchy(std::vector<WLDFragment> &out, 
 		for (uint32_t i = 0; i < sz; ++i) {
 			int32_t ref = *(int32_t*)frag_buffer;
 
-			if(out[ref - 1].type = 0x2d) {
+			if(out[ref - 1].type == 0x2d) {
 				MeshReference &f = reinterpret_cast<MeshReference&>(out[ref - 1]);
 				auto mod_ref = f.GetData();
 

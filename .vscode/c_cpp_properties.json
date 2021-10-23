@@ -3,6 +3,22 @@
         {
             "name": "Mac",
             "includePath": [
+                "${workspaceFolder}/**",
+                "${default}",
+                "${workspaceFolder}/src/common",
+                "${workspaceFolder}/dependencies/glm/glm",
+                "${workspaceFolder}/src/log"
+            ],
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++17",
+            "compilerPath": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++",
+            "macFrameworkPath": [
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/usr/include"
+            ]
+        },
+        {
+            "name": "Win32",
+            "includePath": [
                 "${default}",
                 "${workspaceFolder}/src/common",
                 "${workspaceFolder}/dependencies/glm/glm",

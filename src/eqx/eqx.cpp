@@ -26,7 +26,9 @@
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#ifdef WIN32
 #define STBI_MSC_SECURE_CRT
+#endif
 
 #include "gltf/tiny_gltf.h"
 using namespace tinygltf;
@@ -79,10 +81,13 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 	
-	
-	for(i = 1; i < argc; ++i) {
+	int parseCount = 0;
+	for (i = 1; i < argc; ++i) {
+		if (strlen(argv[i]) < 2) continue;
 		parse(argv[i]);
+		parseCount++;
 	}
+	eqLogMessage(LogInfo, "eqx finished %d target%s", parseCount, (parseCount > 1) ? "s" : "");
 	return 0;
 }
 
@@ -90,7 +95,7 @@ int main(int argc, char **argv) {
 void parse(const char* path) {
 	if (strlen(path) < 2) return;
 
-	eqLogMessage(LogInfo, "parsing %s", path);
+	eqLogMessage(LogInfo, "%s: parsing", path);
 	filesystem::path fp = filesystem::path(path);
 	
 	string zone_name = fp.filename().string();
@@ -370,8 +375,7 @@ void gltfToWld(const char* path) {
 	
 	
 	bool resp = loader.LoadASCIIFromFile(&model, &err, &warn, path);
-	//bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, argv[1]); // for binary glTF(.glb)
-
+	
 	if (!warn.empty()) {
 		eqLogMessage(LogWarn, "%s: %s", path, warn.c_str());
 	}
@@ -420,17 +424,116 @@ void glbToWld(const char* path) {
 void gltfModelToWld(const char *path, Model model) {
 	auto wldModel(new EQEmu::S3D::Geometry());
 	wldModel->SetName(path);
-	for (auto node: model.nodes) {
+	vector<EQEmu::S3D::WLDFragment> wldFile;
+	
+	for (size_t n = 0; n < model.nodes.size(); n++) {
+		auto node = model.nodes[n];
 		if (ifind(node.name, "light")) continue; //printf("%s %0.2f %0.2f %0.2f\n", node.name.c_str(), node.translation[0], node.translation[1], node.translation[2]);
 		if (ifind(node.name, "camera")) continue;
 		if (node.translation.size() == 0) continue;
-		printf("%s node %0.2f, %0.2f, %0.2f\n", node.name.c_str(), node.translation[0], node.translation[1], node.translation[2]);
+		
+		//printf("%s node %0.2f, %0.2f, %0.2f\n", node.name.c_str(), node.translation[0], node.translation[1], node.translation[2]);
 		
 		if (model.meshes.size() < node.mesh) {
-			eqLogMessage(LogWarn, "node %s refers to mesh %d, which is larger than meshes (%d)", node.name.c_str(), node.mesh, model.meshes.size());			
+			eqLogMessage(LogWarn, "%s: node %s refers to mesh %d, which is larger than total meshes (%d)", path, node.name.c_str(), node.mesh, model.meshes.size());			
 			return;
 		}
-		for (auto prim: model.meshes[node.mesh].primitives) {
+
+		for (size_t p = 0; p < model.meshes[node.mesh].primitives.size(); p++) {
+			auto primitive = model.meshes[node.mesh].primitives[p];
+
+			if (primitive.indices < 0) {
+				eqLogMessage(LogWarn, "%s: mesh %d primitive %d has no indices, ignoring", path, node.mesh, p);
+				continue;
+			}
+			std::map<std::string, int>::const_iterator it(primitive.attributes.begin());
+    		std::map<std::string, int>::const_iterator itEnd(primitive.attributes.end());
+
+			int start = 0;
+			
+			auto vertex(new EQEmu::S3D::Geometry::Vertex());
+
+			for (; it != itEnd; it++) {
+				if (it->second < 0) {
+					eqLogMessage(LogWarn, "%s: mesh %d primitive %d attribute %s is negative (%d), ignoring", path, node.mesh, p, it->first.c_str(), it->second);
+					continue;
+				}
+				
+      			const tinygltf::Accessor &accessor = model.accessors[it->second];
+				auto& attributeBufferView = model.bufferViews[accessor.bufferView];
+				auto& attributeBuffer = model.buffers[attributeBufferView.buffer];
+				int size = 1;
+				if (accessor.type == TINYGLTF_TYPE_SCALAR) {
+					size = 1;
+				} else if (accessor.type == TINYGLTF_TYPE_VEC2) {
+					size = 2;
+				} else if (accessor.type == TINYGLTF_TYPE_VEC3) {
+					size = 3;
+				} else if (accessor.type == TINYGLTF_TYPE_VEC4) {
+					size = 4;
+				} else {
+					eqLogMessage(LogWarn, "%s: mesh %d primitive %d attribute %s accessor type is %d and unsupported, ignoring", path, node.mesh, p, it->first.c_str(), accessor.type);
+					continue;
+				}
+				if (it->first.compare("POSITION") != 0) {
+					if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+						eqLogMessage(LogWarn, "%s: mesh %d primitive %d attribute %s componentType is not float, ignoring", path, node.mesh, p, it->first.c_str(), accessor.type);
+						continue;
+					}
+					
+					const float* bufferData = (const float*)(attributeBuffer.data.data() + accessor.byteOffset + attributeBufferView.byteOffset);
+					for (auto i = 0; i < accessor.count; i++) {
+						vertex->nor.x = bufferData[i * 3 + 0];
+						vertex->nor.y = bufferData[i * 3 + 1];
+						vertex->nor.z = bufferData[i * 3 + 2];
+					}
+				}
+				if (it->first.compare("NORMAL") != 0) {
+					if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+						eqLogMessage(LogWarn, "%s: mesh %d primitive %d attribute %s componentType is not float, ignoring", path, node.mesh, p, it->first.c_str(), accessor.type);
+						continue;
+					}
+					
+					const float* bufferData = (const float*)(attributeBuffer.data.data() + accessor.byteOffset + attributeBufferView.byteOffset);
+					for (auto i = 0; i < accessor.count; i++) {
+						vertex->pos.x = bufferData[i * 3 + 0];
+						vertex->pos.y = bufferData[i * 3 + 1];
+						vertex->pos.z = bufferData[i * 3 + 2];
+					}
+				}
+				if (it->first.compare("TEXCOORD_0") != 0) {
+					if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+						eqLogMessage(LogWarn, "%s: mesh %d primitive %d attribute %s componentType is not float, ignoring", path, node.mesh, p, it->first.c_str(), accessor.type);
+						continue;
+					}
+					
+					const float* bufferData = (const float*)(attributeBuffer.data.data() + accessor.byteOffset + attributeBufferView.byteOffset);
+					for (auto i = 0; i < accessor.count; i++) {
+						vertex->tex.x = bufferData[i * 2 + 0];
+						vertex->tex.y = bufferData[i * 2 + 1];
+					}
+				}
+				if ((it->first.compare("POSITION") != 0) &&
+					(it->first.compare("NORMAL") != 0) &&
+					(it->first.compare("TEXCOORD_0") != 0)) continue;
+				
+				//if (gGLProgramState.attribs[it->first] >= 0) {
+				// Compute byteStride from Accessor + BufferView combination.
+				int byteStride = accessor.ByteStride(model.bufferViews[accessor.bufferView]);
+				if(byteStride < 0) {
+					eqLogMessage(LogWarn, "%s: mesh %d primitive %d attribute %s has no buffer, ignoring", path, node.mesh, p, it->first.c_str(), accessor.type);
+					continue;
+				}
+				eqLogMessage(LogWarn, "%s: mesh %d primitive %d attribute %s", path, node.mesh, p, it->first.c_str(), accessor.type);
+			}
+
+			//https://github.com/andreasdr/tdme2/blob/f76444c2d6568fee75ed1f61514f77f73c41e7a4/src/tdme/engine/fileio/models/GLTFReader.cpp#L442
+
+			
+			wldModel->AddVertex(*vertex);			
+
+
+			/*
 			if (model.materials.size() < prim.material) {
 				eqLogMessage(LogWarn, "node %s refers to mesh %d material %d, which is larger than materials (%d)", node.name.c_str(), node.mesh, prim.material, model.materials.size());				
 				return;
@@ -445,14 +548,7 @@ void gltfModelToWld(const char *path, Model model) {
 			//https://github.com/andreasdr/tdme2/blob/f76444c2d6568fee75ed1f61514f77f73c41e7a4/src/tdme/engine/fileio/models/GLTFReader.cpp#L442
 			for (auto kv = prim.attributes.begin(); kv != prim.attributes.end(); kv++) {
 				printf("attr: %s\n", kv->first.c_str());
-				if (kv->first._Equal("POSITION")) {
-					auto accessor = model.accessors[kv->second];
-					if (accessor.type == (int)TINYGLTF_TYPE_VEC3) {
-						eqLogMessage(LogWarn, "node %s refers to mesh %d attr %s value %d type %d, which is not VEC3 (3)",  node.name.c_str(), node.mesh, kv->first.c_str(), kv->second, accessor.type);				
-						return;
-					}
-					
-				}
+				
 			}
 
 			if (model.accessors.size() < prim.indices)
@@ -473,14 +569,13 @@ void gltfModelToWld(const char *path, Model model) {
 			}
 
 			//auto bufferView = model.bufferViews[accessor.bufferView];
-			
-
-		}
-
-		
+			*/
+		}		
 	}
+	wldFile.push_back(wldModel);
 
-	//wldModel->AddVert();
+	
+	eqLogMessage(LogInfo, "added %d vert", wldModel->GetVertices().size());
 }
 
 bool ifind(const string & strHaystack, const string & strNeedle) {
